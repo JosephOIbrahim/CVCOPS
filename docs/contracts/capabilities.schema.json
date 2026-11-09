@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "cvcops.capabilities.v1",
+  "title": "CVCOPs capability manifest",
+  "description": "What the engine can do, how to call it, and what each call may touch. An agent such as SYNAPSE registers tools from this file. Decision 0001 sets the rules it encodes: one call per operation, writes only inside the output folder, never a Houdini scene.",
+  "type": "object",
+  "required": ["schema", "engine", "operations"],
+  "additionalProperties": false,
+  "properties": {
+    "schema": {"const": "cvcops.capabilities.v1"},
+    "engine": {
+      "type": "object",
+      "required": ["package", "version", "contract", "receipt_schema", "invoke"],
+      "additionalProperties": false,
+      "properties": {
+        "package": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+        "version": {"type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$"},
+        "contract": {"type": "string"},
+        "receipt_schema": {"type": "string"},
+        "invoke": {
+          "type": "object",
+          "required": ["interpreter_env", "module"],
+          "additionalProperties": false,
+          "properties": {
+            "interpreter_env": {"type": "string", "description": "Environment variable that names the worker's Python interpreter."},
+            "module": {"type": "string"}
+          }
+        }
+      }
+    },
+    "operations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/operation"}
+    }
+  },
+  "$defs": {
+    "operation": {
+      "type": "object",
+      "required": ["name", "status", "milestone", "summary", "argv", "effects", "guard"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+        "status": {"enum": ["available", "planned", "parked"]},
+        "milestone": {"type": "string"},
+        "summary": {"type": "string", "minLength": 10},
+        "serves": {"type": "string"},
+        "argv": {"type": ["array", "null"], "items": {"type": "string"}},
+        "inputs": {"type": "array", "items": {"$ref": "#/$defs/input"}},
+        "outputs": {"type": "array", "items": {"$ref": "#/$defs/output"}},
+        "effects": {"$ref": "#/$defs/effects"},
+        "guard": {"type": ["string", "null"], "description": "The operation to call first to learn whether this one has work to do."},
+        "exit_codes": {
+          "type": "object",
+          "propertyNames": {"pattern": "^\\d+$"},
+          "additionalProperties": {"type": "string"}
+        }
+      },
+      "if": {"properties": {"status": {"enum": ["available", "planned"]}}},
+      "then": {"properties": {"argv": {"type": "array", "minItems": 1}}}
+    },
+    "input": {
+      "type": "object",
+      "required": ["name", "kind", "description"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {"type": "string"},
+        "kind": {"enum": ["path", "path_pattern", "frame_range", "choice", "number", "flag"]},
+        "description": {"type": "string"},
+        "choices": {"type": "array", "items": {"type": "string"}},
+        "default": {}
+      }
+    },
+    "output": {
+      "type": "object",
+      "required": ["pattern", "kind"],
+      "additionalProperties": false,
+      "properties": {
+        "pattern": {"type": "string"},
+        "kind": {"enum": ["flow_exr", "receipt", "report", "stdout_json"]},
+        "schema": {"type": "string"}
+      }
+    },
+    "effects": {
+      "type": "object",
+      "required": ["reads", "writes", "scene", "network", "gpu"],
+      "additionalProperties": false,
+      "properties": {
+        "reads": {"type": "array", "items": {"type": "string"}},
+        "writes": {"type": "array", "items": {"const": "out_dir"}, "maxItems": 1, "description": "An operation writes inside the output folder it is given, or nowhere."},
+        "scene": {"const": "none", "description": "The engine never edits a Houdini scene."},
+        "network": {"const": "none"},
+        "gpu": {"enum": ["none", "when_requested"]}
+      }
+    }
+  }
+}

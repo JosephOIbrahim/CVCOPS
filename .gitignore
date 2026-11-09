@@ -1,0 +1,14 @@
+# machine paths: copy local.toml.example
+local.toml
+.venv/
+.venv-cuda/
+__pycache__/
+*.pyc
+.pytest_cache/
+# written fresh by the judge on every rung-2 run
+houdini/test_prefs/
+probe_out/
+# left from unpacking the kit on the workstation
+cvcops-kit.zip
+cvcops-repo.zip
+.write_probe

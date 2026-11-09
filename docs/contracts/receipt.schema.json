@@ -1,0 +1,463 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "cvcops.receipt.v1",
+  "title": "CVCOPs flow receipt",
+  "description": "One per frame pair, written last as flow.####.json through a temporary file and an atomic rename. It records what ran, on what, with what, and how long it took. A value the engine cannot measure is null, never guessed.",
+  "type": "object",
+  "required": [
+    "schema",
+    "status",
+    "contract",
+    "engine",
+    "frame",
+    "inputs",
+    "image",
+    "analysis",
+    "recipe",
+    "validity",
+    "cv2",
+    "backend",
+    "threads",
+    "cache_key",
+    "created_utc"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema": {
+      "const": "cvcops.receipt.v1"
+    },
+    "status": {
+      "enum": [
+        "ok",
+        "error"
+      ]
+    },
+    "error": {
+      "type": "string"
+    },
+    "contract": {
+      "const": "flow-contract-v1"
+    },
+    "engine": {
+      "type": "object",
+      "required": [
+        "package",
+        "version"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "package": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        }
+      }
+    },
+    "frame": {
+      "type": "object",
+      "required": [
+        "a",
+        "b",
+        "fps",
+        "interval"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "a": {
+          "type": "integer"
+        },
+        "b": {
+          "type": "integer"
+        },
+        "fps": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "interval": {
+          "type": "number"
+        }
+      }
+    },
+    "inputs": {
+      "type": "object",
+      "required": [
+        "a",
+        "b"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "a": {
+          "$ref": "#/$defs/file"
+        },
+        "b": {
+          "$ref": "#/$defs/file"
+        },
+        "mask": {
+          "$ref": "#/$defs/file"
+        }
+      }
+    },
+    "output": {
+      "$ref": "#/$defs/file"
+    },
+    "image": {
+      "type": "object",
+      "required": [
+        "width",
+        "height"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "width": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "height": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "analysis": {
+      "type": "object",
+      "required": [
+        "scale",
+        "clipped_share",
+        "grey_levels"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "luminance_weights": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "number"
+          },
+          "minItems": 3,
+          "maxItems": 3
+        },
+        "gain": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "gamma": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "scale": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1
+        },
+        "color_space": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "clipped_share": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "grey_levels": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 256
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "params": {
+      "type": "object",
+      "required": [
+        "digest",
+        "values"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "digest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "values": {
+          "type": "object"
+        }
+      }
+    },
+    "recipe": {
+      "type": "object",
+      "required": [
+        "name",
+        "source_sha256"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "source_sha256": {
+          "$ref": "#/$defs/sha256"
+        }
+      }
+    },
+    "validity": {
+      "type": "object",
+      "required": [
+        "tolerance_px",
+        "mask"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "tolerance_px": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "mask": {
+          "type": "boolean"
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "description": "Per-pair numbers an agent can rank frames by without opening the EXR.",
+      "additionalProperties": false,
+      "properties": {
+        "valid_share": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "median_motion_px": {
+          "type": "number",
+          "minimum": 0
+        },
+        "p99_motion_px": {
+          "type": "number",
+          "minimum": 0
+        }
+      }
+    },
+    "cv2": {
+      "type": "object",
+      "required": [
+        "version",
+        "build_sha256"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "version": {
+          "type": "string"
+        },
+        "build_sha256": {
+          "$ref": "#/$defs/sha256"
+        }
+      }
+    },
+    "backend": {
+      "type": "object",
+      "required": [
+        "requested",
+        "ran",
+        "opencl_in_use",
+        "device"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "requested": {
+          "enum": [
+            "cpu",
+            "opencl",
+            "cuda"
+          ]
+        },
+        "ran": {
+          "enum": [
+            "cpu",
+            "opencl",
+            "cuda"
+          ]
+        },
+        "opencl_in_use": {
+          "type": "boolean"
+        },
+        "device": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "threads": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "timings_s": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "number",
+        "minimum": 0
+      }
+    },
+    "cache_key": {
+      "$ref": "#/$defs/sha256"
+    },
+    "created_utc": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "ok"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "output"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "error"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "error"
+        ]
+      }
+    },
+    {
+      "description": "Nothing is silent: an ok receipt that asked for cpu ran on cpu.",
+      "if": {
+        "properties": {
+          "status": {
+            "const": "ok"
+          },
+          "backend": {
+            "properties": {
+              "requested": {
+                "const": "cpu"
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "backend": {
+            "properties": {
+              "ran": {
+                "const": "cpu"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "Nothing is silent: an ok receipt that asked for opencl ran on opencl.",
+      "if": {
+        "properties": {
+          "status": {
+            "const": "ok"
+          },
+          "backend": {
+            "properties": {
+              "requested": {
+                "const": "opencl"
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "backend": {
+            "properties": {
+              "ran": {
+                "const": "opencl"
+              },
+              "opencl_in_use": {
+                "const": true
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "Nothing is silent: an ok receipt that asked for cuda ran on cuda.",
+      "if": {
+        "properties": {
+          "status": {
+            "const": "ok"
+          },
+          "backend": {
+            "properties": {
+              "requested": {
+                "const": "cuda"
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "backend": {
+            "properties": {
+              "ran": {
+                "const": "cuda"
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "file": {
+      "type": "object",
+      "required": [
+        "path",
+        "sha256"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "sha256": {
+          "$ref": "#/$defs/sha256"
+        }
+      }
+    }
+  }
+}

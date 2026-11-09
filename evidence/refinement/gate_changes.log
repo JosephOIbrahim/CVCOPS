@@ -1,0 +1,22 @@
+2026-11-08 pass 1: fact patterns updated for superseded evidence, not to make a candidate pass.
+  - removed "fails all five", "fails three": the holdout changed from five fixed suites to 25 ranged pairs (FACTS E9, E10).
+  - added "1.53", "1.33 to 1.36", "25-pair holdout", "15-pair": new verified results (FACTS E10, M10).
+  - "Edit(./vendor/**)" -> "Edit(/vendor/**)": the permissions doc anchors /path at the project (FACTS K2).
+  - added "judge.lock", "BLOCKED:": the fix for the pass-1 high-severity defect must not regress.
+2026-11-08 pass 4: "a quarter of the job" -> "a quarter of the time" + "bake receipt". The reviewer showed "the job" had no defined measurement; the gate now names the M3 bake receipt.
+2026-11-08 pass 5: "0.12 to 0.79 s" -> "0.79 s (MEDIUM)". The reviewer showed 0.12 s was FAST; the claim now names each preset (FACTS M5).
+2026-11-09 first-principles review: the gates changed with the evidence, and each change is listed here.
+  - "0.085 px" -> "0.083 px": the suite row is now measured on the 15-pair suite the tests use (FACTS M12), not on the first five fixtures (M7).
+  - removed "Edit(/vendor/**)" from the fact patterns: the settings left the blueprint and ship as .claude/settings.json. G3 now reads that file and checks the deny rule, that the Stop hook fails closed, that it has the pause line, and that the PowerShell tool is off.
+  - added "WAITING:", "thresholds_reference.py", "--selftest", "at most 3%", "two regions 16 px apart", "32-bit float", "1 to 48 threads", "Git Bash", "claude doctor", ".claude/settings.json", "tools/unattended.sh", "0.869": the review's fixes must not regress.
+  - new gate G6: every row of evidence/thresholds_reference.py must appear in the threshold table with the same wording and threshold. Two validity thresholds had been locked into the table that the kit's own suite could not meet; G6 ties the table to a reference that is run.
+  - G4 cap raised from 1.10 to 1.25 times the baseline (5,878 words). The review found defects whose fixes are mechanisms, not phrasing: the pause line, the fail-closed hook, the environment exit, the pinned exam and its self-test, the unattended launcher. The growth is in sections 8 and 9. The settings JSON and the launch command were moved out of the document into files to hold it down. The cap applies again to any later pass.
+2026-11-09 (workstation cross-reference): G1 gains seven patterns for facts the blueprint now rests on: OpenFX
+  (the half-holding plug-in premise), "Precision 32-bit" and "ROP Image" (the File COP and writer settings from the
+  22.0.429 docs), "Maintain State" (probe P5), write_exr (the tests' seam), mission.txt (the launcher's refusal) and
+  "preferences folder" (hython isolation). CAP stays 1.25: the additions were paid for by cutting duplication
+  (the capsule's first line, five CLAUDE.md rows merged into one, the risk row whose story lives in STATE).
+2026-11-09 (plugin scaffold): G1 gains five patterns for what the blueprint now points at: impls.py (the adapters
+  that build what each row grades), capabilities.json (SYNAPSE's interface), 0001-synapse-umbrella (the decision),
+  "nine planted faults" (the self-test), ARCHITECTURE.md. CAP stays 1.25; the additions were paid for by trims in
+  sections 2, 8 and 10.

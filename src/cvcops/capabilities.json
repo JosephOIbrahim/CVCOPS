@@ -1,0 +1,71 @@
+{
+  "schema": "cvcops.capabilities.v1",
+  "engine": {
+    "package": "cvcops",
+    "version": "0.0.0",
+    "contract": "flow-contract-v1",
+    "receipt_schema": "cvcops.receipt.v1",
+    "invoke": {"interpreter_env": "CVCOPS_WORKER_PYTHON", "module": "cvcops"}
+  },
+  "operations": [
+    {
+      "name": "capabilities",
+      "status": "available",
+      "milestone": "kit",
+      "summary": "Print this manifest, so an adapter reads it from the installed engine rather than from a copy.",
+      "argv": ["capabilities"],
+      "inputs": [],
+      "outputs": [{"pattern": "stdout", "kind": "stdout_json", "schema": "cvcops.capabilities.v1"}],
+      "effects": {"reads": [], "writes": [], "scene": "none", "network": "none", "gpu": "none"},
+      "guard": null,
+      "exit_codes": {"0": "printed"}
+    },
+    {
+      "name": "verify",
+      "status": "planned",
+      "milestone": "v0.1, Mission 2",
+      "summary": "Report each frame pair as fresh, stale or missing from its receipt and cache key, without computing any flow.",
+      "argv": ["verify", "--in", "{analysis_pattern}", "--out", "{out_dir}", "--frames", "{frames}", "--json"],
+      "inputs": [
+        {"name": "analysis_pattern", "kind": "path_pattern", "description": "Grey analysis frames exported by Houdini, such as bake/analysis.####.exr"},
+        {"name": "out_dir", "kind": "path", "description": "Folder that holds the flow files and receipts"},
+        {"name": "frames", "kind": "frame_range", "description": "First and last frame A, such as 1001-1100; each pairs with the next frame"}
+      ],
+      "outputs": [{"pattern": "stdout", "kind": "stdout_json"}],
+      "effects": {"reads": ["analysis_pattern", "out_dir"], "writes": [], "scene": "none", "network": "none", "gpu": "none"},
+      "guard": null,
+      "exit_codes": {"0": "every pair is fresh", "1": "at least one pair is stale or missing", "3": "broken environment"}
+    },
+    {
+      "name": "flow",
+      "status": "planned",
+      "milestone": "v0.1, Mission 2",
+      "summary": "Forward optical flow from each analysis frame to the next, with a validity channel and a receipt per pair.",
+      "argv": ["flow", "--in", "{analysis_pattern}", "--out", "{out_dir}", "--frames", "{frames}", "--recipe", "{recipe}", "--backend", "{backend}"],
+      "inputs": [
+        {"name": "analysis_pattern", "kind": "path_pattern", "description": "Grey analysis frames exported by Houdini, such as bake/analysis.####.exr"},
+        {"name": "out_dir", "kind": "path", "description": "Folder the flow files and receipts are written to; nothing is written anywhere else"},
+        {"name": "frames", "kind": "frame_range", "description": "First and last frame A, such as 1001-1100; each pairs with the next frame"},
+        {"name": "recipe", "kind": "choice", "description": "A named flow recipe", "choices": ["dis_medium", "dis_fast"], "default": "dis_medium"},
+        {"name": "backend", "kind": "choice", "description": "Where it runs; an unavailable backend is an error, never a quiet substitute", "choices": ["cpu", "opencl", "cuda"], "default": "cpu"}
+      ],
+      "outputs": [
+        {"pattern": "flow.####.exr", "kind": "flow_exr"},
+        {"pattern": "flow.####.json", "kind": "receipt", "schema": "cvcops.receipt.v1"}
+      ],
+      "effects": {"reads": ["analysis_pattern"], "writes": ["out_dir"], "scene": "none", "network": "none", "gpu": "when_requested"},
+      "guard": "verify",
+      "exit_codes": {"0": "every pair written or already fresh", "1": "a pair failed; its receipt says why", "3": "broken environment"}
+    },
+    {
+      "name": "temporal_check",
+      "status": "parked",
+      "milestone": "after v0.1",
+      "summary": "Rank frames by change the flow cannot explain: pull frame B onto A's grid and measure what is left, which finds pops and flicker.",
+      "serves": "SYNAPSE vision roadmap, first question: which frames deserve attention",
+      "argv": null,
+      "effects": {"reads": ["analysis_pattern", "out_dir"], "writes": ["out_dir"], "scene": "none", "network": "none", "gpu": "when_requested"},
+      "guard": "verify"
+    }
+  ]
+}

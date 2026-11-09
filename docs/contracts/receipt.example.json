@@ -1,0 +1,25 @@
+{
+  "schema": "cvcops.receipt.v1",
+  "status": "ok",
+  "contract": "flow-contract-v1",
+  "engine": {"package": "cvcops", "version": "0.1.0"},
+  "frame": {"a": 1001, "b": 1002, "fps": 24.0, "interval": 1.0},
+  "inputs": {
+    "a": {"path": "bake/analysis.1001.exr", "sha256": "1111111111111111111111111111111111111111111111111111111111111111"},
+    "b": {"path": "bake/analysis.1002.exr", "sha256": "2222222222222222222222222222222222222222222222222222222222222222"}
+  },
+  "output": {"path": "bake/flow.1001.exr", "sha256": "3333333333333333333333333333333333333333333333333333333333333333"},
+  "image": {"width": 960, "height": 540},
+  "analysis": {"luminance_weights": [0.2126, 0.7152, 0.0722], "gain": 1.0, "gamma": 2.2, "scale": 0.5, "color_space": null,
+               "clipped_share": 0.004, "grey_levels": 211, "warnings": []},
+  "params": {"digest": "4444444444444444444444444444444444444444444444444444444444444444", "values": {"tolerance_px": 1.0}},
+  "recipe": {"name": "dis_medium", "source_sha256": "5555555555555555555555555555555555555555555555555555555555555555"},
+  "validity": {"tolerance_px": 1.0, "mask": false},
+  "summary": {"valid_share": 0.981, "median_motion_px": 3.2, "p99_motion_px": 14.8},
+  "cv2": {"version": "5.0.0", "build_sha256": "6666666666666666666666666666666666666666666666666666666666666666"},
+  "backend": {"requested": "cpu", "ran": "cpu", "opencl_in_use": false, "device": null},
+  "threads": 32,
+  "timings_s": {"read": 0.011, "flow": 0.042, "validity": 0.085, "write": 0.019, "total": 0.161},
+  "cache_key": "7777777777777777777777777777777777777777777777777777777777777777",
+  "created_utc": "2026-11-09T18:00:00Z"
+}

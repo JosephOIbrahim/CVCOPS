@@ -1,0 +1,78 @@
+# Flow recipe: speed behind a hard quality gate (see evaluator.py).
+# Start small. Read the trace after 20-50 iterations before running more.
+max_iterations: 100
+checkpoint_interval: 5
+random_seed: 42
+diff_based_evolution: false     # recipes are short; full rewrites can restructure freely
+enforce_evolve_blocks: true     # edits outside the EVOLVE-BLOCK markers are reverted
+max_code_length: 12000
+early_stopping_patience: 40
+
+llm:
+  # Default: a local model behind an OpenAI-compatible endpoint (Ollama). No per-call cost.
+  api_base: "http://localhost:11434/v1"
+  api_key: "local"
+  temperature: 0.8
+  max_tokens: 4000
+  timeout: 300
+  retries: 3
+  models:
+    - name: "REPLACE_WITH_YOUR_LOCAL_CODE_MODEL"
+      weight: 1.0
+  # To swap in Claude through the Claude Code CLI (uses the CLI login; capped per call),
+  # delete the three keys above (api_base, api_key, models) and use:
+  # provider: "claude_code"
+  # models:
+  #   - { name: "haiku",  weight: 0.8, max_tokens: 8000,  max_budget_usd: 0.10 }
+  #   - { name: "sonnet", weight: 0.2, max_tokens: 16000, max_budget_usd: 0.50 }
+
+prompt:
+  system_message: |
+    You are an expert in classical optical flow and high-performance OpenCV in Python.
+
+    You are optimising one pure function, estimate_flow(a, b), which returns the dense
+    forward optical flow between two 8-bit greyscale frames of equal size. The reference is
+    OpenCV's DIS at the MEDIUM preset. The seed is the best DIS parameter set a sweep found,
+    so tuning DIS numbers alone will not beat it: look for structure the sweep cannot express.
+
+    YOUR SCORE IS THE SPEEDUP over the reference. Accuracy is a HARD GATE against exact
+    ground truth, not a trade-off. On every test pair you may be at most
+        mean endpoint error           reference's + 0.30 px
+        worst 32x32 block mean error  1.5 x reference's + 0.50 px   (catches a local region that is wrong)
+    and over all pairs the mean may be at most the reference's + 0.15 px.
+    Fail any of these and you score ZERO however fast you are. The pairs include rigid
+    motion, a smooth non-rigid warp, a small object moving against the background, and an
+    exposure change with noise. So do NOT:
+      - smooth or downsample so hard that a small moving object disappears
+      - return one global motion for the whole frame
+      - forget to rescale the vectors when you compute at reduced resolution
+      - keep any state between calls, read or write files, or start threads or processes
+      - branch on what the input looks like in order to special-case a test
+
+    Legitimate ways to go faster include: computing at reduced resolution and upsampling
+    (rescale the vectors), tuning DIS itself (finest scale, patch stride, gradient-descent
+    iterations, variational-refinement iterations and weights), a coarse pass used as the
+    initial flow for a cheaper fine pass, lighter refinement, and avoiding needless copies
+    and conversions.
+
+    Use only cv2 (main modules), numpy and the standard library. Keep the entry point
+    estimate_flow(a, b) with the same signature. Return float32 of shape (H, W, 2), in
+    pixels, x to the right and y downward.
+  num_top_programs: 3
+  num_diverse_programs: 2
+  include_artifacts: true
+
+database:
+  population_size: 30
+  num_islands: 2
+  # Keep both "accurate and fast" and "approximate and faster" alive.
+  feature_dimensions:
+    - complexity
+    - mean_epe
+
+evaluator:
+  timeout: 300
+  cascade_evaluation: true
+  cascade_thresholds: [0.5, 0.5]
+  parallel_evaluations: 1       # the score is a timing: never evaluate two candidates at once
+  use_llm_feedback: false

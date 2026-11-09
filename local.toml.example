@@ -1,0 +1,11 @@
+# Copy to local.toml, which git ignores. Machine paths only; probe P1 records what they point at.
+# Forward slashes work on Windows.
+
+# Houdini's hython, for rung 2 and the probes (probes/hython.py runs it the way the judge does).
+hython = "C:/Program Files/Side Effects Software/Houdini 22.0.XXX/bin/hython.exe"
+
+# The OpenCV 5.1 prep project, which Mission 6 builds CUDA from (FACTS X5).
+opencv_prep = "E:/OpenCV5.1_Prep"
+
+# The interpreter that holds the CUDA build, once Mission 6 makes it. Leave empty until then.
+cuda_python = ""

@@ -1,0 +1,6 @@
+{
+  "space": null,
+  "v_sign": null,
+  "recorded_by": "probe P4",
+  "about": "How the asset's converted flow maps back to opencv_px. space: pixel, texture (0 to 1 across the data window) or image (-1 to 1 across the longer side, FACTS H15). v_sign: opencv v (down) = v_sign times Houdini v. Mission 0 fills both from probe P4 before the lock; until then the M3 and M4 rows report a broken environment."
+}

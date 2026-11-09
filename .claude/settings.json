@@ -1,0 +1,17 @@
+{
+  "env": { "CLAUDE_CODE_USE_POWERSHELL_TOOL": "0" },
+  "permissions": {
+    "deny": ["Edit(/vendor/**)", "Bash(*hython* -m pip*)", "Bash(*hython* -m ensurepip*)", "Bash(*lock_judge*)"],
+    "ask": [
+      "Edit(/tools/lock_judge.py)", "Edit(/judge.lock)", "Edit(/evidence/thresholds_reference.py)",
+      "Edit(/evolve/flow_recipe/evaluator.py)", "Edit(/evolve/flow_recipe/fixtures.py)",
+      "Edit(/evolve/flow_recipe/promote.py)", "Edit(/evolve/flow_recipe/test_gaming.py)",
+      "Bash(git push *)"
+    ]
+  },
+  "hooks": {
+    "Stop": [
+      { "hooks": [ { "type": "command", "command": "d=$PWD; while [ -n \"$d\" ] && [ ! -f \"$d/docs/STATE.md\" ]; do d=${d%/*}; done; cd \"${d:-.}\" || exit 2; head -n 1 docs/STATE.md 2>/dev/null | grep -Eq '^(WAITING|BLOCKED):' || uv run python tools/check.py --hook || exit 2" } ] }
+    ]
+  }
+}
