@@ -19,11 +19,13 @@ if mode == "env": print("ENVIRONMENT: hython not found", file=sys.stderr); sys.e
 PY
 printf 'import sys\nprint("worktree check ran", file=sys.stderr)\nsys.exit(1)\n' > .claude/worktrees/m1/tools/check.py
 printf '#!/bin/sh\nshift; exec "$@"\n' > bin/uv; chmod +x bin/uv          # stands in for `uv run`
-ln -s "$PY" bin/python 2>/dev/null || cp "$PY" bin/python
+printf '#!/bin/sh
+exec "%s" "$@"
+' "$PY" > bin/python; chmod +x bin/python
 ok=1
 case_() { want="$1"; where="$2"; desc="$3"; shift 3; ( cd "$D/$where" && "$@" bash -c "$HOOK" ) >/dev/null 2>"$D/err.txt"; got=$?
           [ "$got" = "$want" ] || ok=0; printf '%-4s exit %s (want %s)  %s\n' "$([ "$got" = "$want" ] && echo ok || echo BAD)" "$got" "$want" "$desc"; }
-W="env PATH=$D/bin:$PATH"
+export PATH="$D/bin:$PATH"; W=env
 echo "# State" > docs/STATE.md
 case_ 0 .  "tests pass"                                   $W FAKE=pass
 case_ 2 .  "a test fails"                                 $W FAKE=fail

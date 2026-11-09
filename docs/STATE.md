@@ -1,5 +1,3 @@
-BLOCKED: the shipped evidence/hook_line_cases.sh fails on this workstation (exit 1, 15 of 16 cases exit 127). Cause is its test harness on Windows, not the Stop hook line: an unquoted PATH with spaces, and a copied python that cannot run outside its folder (FACTS K19). A scratch copy with those two harness lines fixed passes all 16 cases on the unchanged hook. Joe: approve fixing the two lines in evidence/hook_line_cases.sh (not a judge file), or decide otherwise, then remove this line.
-
 # State
 
 Updated 2026-11-09. This is the capsule: the next session resumes from here.
@@ -29,7 +27,7 @@ heading, and the Stop hook lets a turn end only when the checks pass or that lin
 | Needs Joe first | The licence: the one open item. The repository will be public (Joe, 9 Nov); no LICENSE file is added until Joe names one. Mission 0 does not wait on it. The `vendor/motion-cops` submodule step in the README. The lock, when Mission 0 asks. |
 | Not yet a repository | Now a repository: `git init -b main` and the first commit `8ddec42` (`git add -A`, Joe-approved). `core.autocrlf` is true on this machine, so a fresh checkout or worktree gets CRLF in `.sh` files; watch for it in `tools/unattended.sh` worktrees. |
 | Open judgment call | GPU as the goal, or GPU as the means (`docs/BLUEPRINT.md`, section 3). Default: the means. |
-| Blockers | `evidence/hook_line_cases.sh` fails here (FACTS K19). Joe's rule: any failure in the rule check stops Mission 0. |
+| Blockers | None. The hook case file was fixed with Joe's approval (FACTS K19). |
 | Still to cross-check | The Synapse repository: how it registers a tool (FACTS A14). The SYNAPSE roadmap was read (FACTS X6). |
 | Open, defaulted | M6 reuses the OpenCV 5.1 prep project's toolchain and build rather than making a second one (FACTS X5). Say so if you want them separate. |
 | Decided | CVCOPs joins SYNAPSE as its perception engine; SYNAPSE depends on it, never the reverse (`docs/decisions/0001-synapse-umbrella.md`). The asset namespace is `cvcops::`, so the first asset is `cvcops::flow::1.0`; the package and command stay `cvcops` (`docs/decisions/0002-names-and-namespace.md`). The controls, the motion opportunities and the ML and AI lanes are scaffolded now and built after v0.1; the temporal check is next after v0.1 (`docs/decisions/0003-scaffold-beyond-v0.1.md`). |
