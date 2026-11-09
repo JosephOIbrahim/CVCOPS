@@ -1,6 +1,7 @@
 {
-  "space": null,
-  "v_sign": null,
-  "recorded_by": "probe P4",
-  "about": "How the asset's converted flow maps back to opencv_px. space: pixel, texture (0 to 1 across the data window) or image (-1 to 1 across the longer side, FACTS H15). v_sign: opencv v (down) = v_sign times Houdini v. Mission 0 fills both from probe P4 before the lock; until then the M3 and M4 rows report a broken environment."
+  "space": "image",
+  "v_sign": -1,
+  "recorded_by": "probe P4, 2026-11-09, Houdini 22.0.492: probes/p4_units.py (FACTS P4 line)",
+  "about": "How the asset's converted flow maps back to opencv_px. space: pixel, texture (0 to 1 across the data window) or image (-1 to 1 across the longer side, FACTS H15). v_sign: opencv v (down) = v_sign times Houdini v. Mission 0 fills both from probe P4 before the lock; until then the M3 and M4 rows report a broken environment.",
+  "measured": "Native Distort reads its direction in image space: 240 px per unit on both axes of a 480 by 270 and of a 270 by 480 image, so half the longer side. It moves content along the direction, with v pointing up, the same through the Direction parameter and a UV layer from File COP; a 180 px move was not capped. The converted flow is content motion in that space, so M4's pull feeds it to Distort at Scale -1, which P4 measured moving content the opposite way. A direction field that varies across the image is untested; the M4 row decides."
 }

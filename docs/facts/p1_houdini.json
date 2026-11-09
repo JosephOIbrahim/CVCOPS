@@ -1,0 +1,20 @@
+{
+ "python": "3.13.17 (main, Oct 28 2026, 21:14:46) [MSC v.1942 64 bit (AMD64)]",
+ "executable": "C:\\Program Files\\Side Effects Software\\Houdini 22.0.492\\bin\\hython.exe",
+ "platform": "Windows-11-10.0.26300-SP0",
+ "numpy": "2.3.2",
+ "openexr": "3.4.3",
+ "houdini": {
+  "version": "22.0.492",
+  "licence_category": "licenseCategoryType.Indie",
+  "hfs": "C:/PROGRA~1/SIDEEF~1/HOUDIN~1.492",
+  "user_pref_dir": "E:/Myth_and_Logic/Software/CVCOPS/houdini/test_prefs/houdini22.0",
+  "package_dir": "E:/Myth_and_Logic/Software/CVCOPS/houdini/test_prefs/packages"
+ },
+ "opencv": null,
+ "tools": {
+  "git": "C:\\Program Files\\Git\\mingw64\\bin\\git.EXE",
+  "bash": "C:\\Program Files\\Git\\usr\\bin\\bash.EXE",
+  "uv": "C:\\Python314\\Scripts\\uv.EXE"
+ }
+}

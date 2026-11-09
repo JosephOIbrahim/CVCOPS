@@ -1,0 +1,25 @@
+{
+ "python": "3.13.14 (tags/v3.13.14:fd17997, Jun 10 2026, 13:03:48) [MSC v.1944 64 bit (AMD64)]",
+ "executable": "E:\\Myth_and_Logic\\Software\\CVCOPS\\.venv\\Scripts\\python.exe",
+ "platform": "Windows-11-10.0.26300-SP0",
+ "numpy": "2.5.4",
+ "openexr": "3.5.3",
+ "houdini": null,
+ "opencv": {
+  "version": "5.0.0",
+  "build_lines": [
+   "OpenEXR:                     NO",
+   "Parallel framework:            Concurrency",
+   "OpenCL:                        YES (NVD3D11)"
+  ],
+  "have_opencl": true,
+  "use_opencl": true,
+  "opencl_device": "NVIDIA GeForce RTX 4090",
+  "threads": 48
+ },
+ "tools": {
+  "git": "C:\\Program Files\\Git\\mingw64\\bin\\git.EXE",
+  "bash": "C:\\Program Files\\Git\\usr\\bin\\bash.EXE",
+  "uv": "C:\\Python314\\Scripts\\uv.EXE"
+ }
+}

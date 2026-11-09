@@ -155,12 +155,12 @@ Nine rules govern the lane.
 | M4 Warp | Pull frame B onto A's grid through native Distort with the converted forward flow. If it meets the warp threshold, ship an example; if not, build Flow Warp to that test. | `--houdini` passes the warp threshold and the example renders | Pick the example's look | Heavy |
 | Release gate v0.1 | A README with measured numbers, limits and the one-file install | Every rung that applies is green on the workstation, and one plate of yours bakes | A plate, and your sign-off on what the flow does to it | |
 | ME Evolve the recipe | Entry: the M3 bake receipt shows flow is a quarter of the time. Sweep, then search in the background. | `promote.py` returns a verdict; it refuses to run until `test_gaming.py` passes and `sweep.py` has run. At most 300 iterations | A model choice and an idle machine | Light |
-| M5 Live lane | Entry: P5 passed, or a two-input OpenFX node cooks with frame B fed through Time Shift. Wrap the same recipe in whichever passed. | The `--houdini` live test | Scrub and judge | Heavy |
+| M5 Live lane | Entry: P2 and P5 passed, or a two-input OpenFX node cooks with frame B fed through Time Shift. Wrap the same recipe in whichever passed. | The `--houdini` live test | Scrub and judge | Heavy |
 | M6 GPU lane | Entry: the M3 bake receipt shows flow is a quarter, or you chose GPU first. Score DIS on OpenCL first; if it reaches adopt, stop. Otherwise ask before the CUDA build in `docs/missions/M6_cuda_build.md`, which reuses your OpenCV 5.1 prep toolchain. | `check.py --gpu` passes and `docs/STATE.md` records a verdict: adopt a named recipe that passes the holdout gate and cuts the M3 bake by 20%, or keep CPU; under GPU first, a provisional verdict on worker timings | The CUDA decision | Heavy |
 | MN Native kernels | Entry: ME returned a verdict and probe P8 passed: a headless harness compiles and times an OpenCL COP kernel. | An OpenCL flow kernel scored by the evolve evaluator | Parked | |
 | MU Upstream | Entry: any time. Five fixes as failing test plus patch in `upstream-fixes/`, a separate clone at `d2a22ad`, never in `vendor/`. A licence request. | Each test fails on `d2a22ad` and passes with its patch | You send the pull requests | Light |
 
-Mission 0 answers seven questions by running code. P2 and P5 serve the live lane and may be recorded as deferred to M5.
+Mission 0 answers seven questions by running code. P2 and P5 serve the live lane, so they wait for M5's entry gate.
 
 | Probe | Question | If it fails |
 | --- | --- | --- |
