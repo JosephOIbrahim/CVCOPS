@@ -12,6 +12,7 @@ Re-run them on the workstation in Mission 0 and record the results next to the s
 | `hda_extract.py <file.hda> <out dir>` | Read-only unpacker for Houdini asset files; used to read upstream kernels | standard library |
 | `thresholds_reference.py` | Every row of the blueprint's threshold table on pinned fixtures, with PASS or FAIL, through the five-method seam the threshold tests use; `METRICS` holds one function per row, and `tests/thresholds/` calls the same ones. `--faults` plants nine faults that must each fail. `--seeds N` repeats the metrics on fresh draws. A row that cannot run fails | `opencv`, `numpy`, `OpenEXR` |
 | `opportunities_reference.py` | Three uses after v0.1, on synthetic fixtures through the same seam: the temporal check ranks two planted frames first, a mark is carried along the flow, and seeds are kept where motion exceeds a threshold. Demonstrations, not locked thresholds (decision 0003) | `opencv`, `numpy` |
+| `controls_dryrun.py` | Houdini builds every v0.1 control in `houdini/build/controls.json` on a throwaway node and reads it back. Run it through `probes/hython.py` | `hython` |
 | `measure_validity.py` | What the validity flag catches by occlusion width, and what each tolerance costs | `opencv`, `numpy` |
 | `measure_encoding.py` | What quantising scene-linear frames to 8 bits costs, with and without gain and gamma | same |
 | `measure_threads.py` | Identical bytes across thread counts; the rounding a half-float layer would add to flow | same |

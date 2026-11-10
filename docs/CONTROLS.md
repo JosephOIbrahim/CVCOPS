@@ -29,6 +29,18 @@ schema. To add or change a control, edit that file. Never edit the built asset.
 The defaults for Recipe, Backend and Validity Tolerance are the worker's own, and the test holds them equal. The
 other defaults are proposals. Joe confirms them, and every label, in Mission 3, because looks are his gate.
 
+## Proven buildable
+
+**Houdini 22.0.492 builds all 14 of these from the file** (FACTS K21). The dry run makes each control on a
+throwaway node and reads it back: name, folder, default and menu items.
+
+```bash
+uv run python probes/hython.py evidence/controls_dryrun.py
+```
+
+The dry run covers parameters only. The two inputs, the two outputs and the Bake button's behaviour arrive with
+Mission 3, which also takes Joe's word on every label and default.
+
 ## Rules
 
 1. **One source.** The builder makes parameters from `controls.json` and from nowhere else.

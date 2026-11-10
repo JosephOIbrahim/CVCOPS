@@ -12,3 +12,7 @@ probe_out/
 cvcops-kit.zip
 cvcops-repo.zip
 .write_probe
+# the explainer video lives on the media branch, not in main's history
+docs/media/*.mp4
+docs/media/out/
+docs/media/fonts/
