@@ -30,7 +30,20 @@ From Mission 1 on, in Git Bash, outside Claude:
 2. `uv run python tools/lock_judge.py`
 3. `git add -A && git commit -m "Start M1"` (with the mission's own name)
 
-Mission 0 needs none of this. Its lock comes at the end, when the session asks for it.
+In Windows PowerShell 5.1 the same three steps look like this. `&&` does not work there, so the commit is two
+lines, and the commit line the lock tool prints must be split the same way.
+
+```powershell
+cd E:\Myth_and_Logic\Software\CVCOPS
+Add-Content tests\thresholds\mission.txt "M1"
+uv run python tools/lock_judge.py
+git add -A
+git commit -m "Start M1"
+```
+
+Run the lock in the working folder, not in another clone. A lock made elsewhere does not count here.
+
+Mission 0 is closed (10 November 2026), so start at Session 2. Its lock comes at the end, when the session asks for it.
 
 ## Session 1: Mission 0
 
