@@ -1,0 +1,23 @@
+{
+ "files": {
+  ".claude/settings.json": "8fd7d4e7fb819d7cb6eaa34f1cf083cf03b851640a21c0e44fa4ab7f0f79c1a1",
+  "docs/contracts/capabilities.schema.json": "d9358ede5c46312eb642e122d7706700c43ff106715d75f2215ac9a77c848cf7",
+  "docs/contracts/receipt.example.json": "980c5dbbe96e0dd8015480c4ab443a03c8c4897dc9915cdc8cc6ec07ec435188",
+  "docs/contracts/receipt.schema.json": "01f073ab7d4ad06a548bbc353ca909d9ddc50777d43bf1c9943bd5e5cca498cc",
+  "docs/contracts/synapse_observation_mapping.md": "069916c118fdfe79bb42d7a369d1855dd0ee31f23e18b585d4e71732eb2a5533",
+  "docs/facts/p1_site_packages.json": "6e28a6265e5e8508f881ebf28ad5968a3808a5b90c5fcdf8cf36fd59847dee48",
+  "evidence/thresholds_reference.py": "e7596d98c686760c8fcebb7a6b7d6f37e384b0c6e29f1d5d425df56b2bca2546",
+  "evolve/flow_recipe/evaluator.py": "2594b2ee2342e78e4e38e4e7c7816b9552fe6ff520651657149fa654c7006a04",
+  "evolve/flow_recipe/fixtures.py": "00801a60422b9fc725de4cba8f70b3434300e4cec52a3594905e8f8530bdffd8",
+  "evolve/flow_recipe/promote.py": "9905ba276e2c513ab4771053a6ec9714f91caabd889db42ab133bf84e41a6e31",
+  "evolve/flow_recipe/test_gaming.py": "a264034b3279b0c1e920a74d79e1da81b9c317dbabd0e8928bd2a237a24b02bf",
+  "tests/thresholds/conftest.py": "6e9090f10a36623f5e5cf28358c0015c3337791b851ef6f0e72a62ad1844b3d3",
+  "tests/thresholds/houdini_units.json": "bdfe3bae56634e858b7b7fa3dede605d9ec3e021e19b424ca34bddec55c8c62d",
+  "tests/thresholds/impls.py": "05b01497ba21222a76fc99b842a1dc1caf3141b893f7ebfd0680a45bedd296a3",
+  "tests/thresholds/mission.txt": "9382dde02ddecba08ab98ac123cbe7c749765365fdfcfb9085d9d909f9448b6e",
+  "tests/thresholds/test_guards.py": "b721d02f6430e02bd6df29fc129266e0d5008f9f3e4bb3caa8caf19668e988eb",
+  "tests/thresholds/test_thresholds.py": "1e0cbb848411589b4eeecdf1252f926b50514fad6328b44dec94f0545447f4f3",
+  "tools/check.py": "b80bf8ce98df81680e4c2562e64e2315628f3a5ffbba01c3c4215f0bd68db33c",
+  "tools/lock_judge.py": "a71c94b77cacaef4fe67a394171a2a6880eef8e05d03326cd44f56315dc8121d"
+ }
+}
