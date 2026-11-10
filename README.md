@@ -31,8 +31,8 @@ For every pixel in a frame, it answers two questions. The first is where that pi
 | Part | State on 10 November 2026 |
 | --- | --- |
 | The judge: threshold tests and `tools/check.py` | Built. Its self-test passes the reference on every row and catches all nine planted faults, on Linux and on Windows. |
-| Mission 0: probes on a real workstation | Recorded. Frames cross Houdini's File COP and ROP Image bit for bit. One step is open: the owner's lock. |
-| The flow operation and the worker command | Not built. Missions 1 and 2. |
+| Mission 0: probes on a real workstation | Done. Frames cross Houdini's File COP and ROP Image bit for bit, and the judge is locked. |
+| The flow operation and the worker command | Not built. Missions 1 and 2. Mission 1 is next. |
 | The Houdini asset, `cvcops::flow::1.0` | Not built. Mission 3. Its 14 parameters are specified in `houdini/build/controls.json`, and a dry run builds them all in Houdini 22. |
 | The warp example | Not built. Mission 4. |
 | The installer, `tools/install.py` | Built. It sets up the worker and proves the judge; it will register the node once there is one. |
@@ -98,8 +98,10 @@ flowchart LR
   M4 --> R(["v0.1"])
   R -.-> T["Temporal check"]
   R -.-> ML["ML lanes, each behind a gate"]
+  classDef done fill:#2E2B28,color:#ffffff,stroke:#2E2B28
   classDef now fill:#C8321A,color:#ffffff,stroke:#C8321A
-  class M0 now
+  class M0 done
+  class M1 now
 ```
 
 Claude Code does the building, one mission per session. The thresholds were measured first, written as tests, and are locked by the owner before each mission starts.
@@ -179,7 +181,7 @@ You can also download `install.py` alone from the [latest pre-release](https://g
 
 There is no node to load into Houdini yet. From v0.1, the same command will register it.
 
-Plain `uv run python tools/check.py` fails until `judge.lock` exists. That is by design.
+The repository carries the owner's `judge.lock`. Plain `uv run python tools/check.py` passes only while the locked tests are unchanged. That is by design.
 
 ## Repository map
 
