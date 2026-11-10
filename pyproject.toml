@@ -1,6 +1,6 @@
 [project]
 name = "cvcops"
-version = "0.0.0"
+version = "0.0.1"
 description = "OpenCV perception for Houdini 22 Copernicus (working title). The engine never imports hou."
 readme = "README.md"
 requires-python = ">=3.13,<3.14"

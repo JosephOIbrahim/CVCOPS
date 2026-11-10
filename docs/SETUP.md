@@ -5,6 +5,9 @@ The public overview is `README.md`. Where things stand is `docs/STATE.md`.
 
 ## First session
 
+`uv run python tools/install.py` does steps 3 and 4 for you: it finds `hython`, writes `local.toml` without a
+byte-order mark, builds the environment and runs the self-test. It never overwrites an existing `local.toml`.
+
 1. Put this folder in a git repository on a machine with Git Bash and `uv`, and commit it. The lock and the
    unattended launcher read committed files.
 2. Pin MotionCOPs, read-only: `git submodule add https://github.com/Boning1011/motion-cops vendor/motion-cops`,

@@ -35,11 +35,12 @@ For every pixel in a frame, it answers two questions. The first is where that pi
 | The flow operation and the worker command | Not built. Missions 1 and 2. |
 | The Houdini asset, `cvcops::flow::1.0` | Not built. Mission 3. Its 14 parameters are specified in `houdini/build/controls.json`, and a dry run builds them all in Houdini 22. |
 | The warp example | Not built. Mission 4. |
+| The installer, `tools/install.py` | Built. It sets up the worker and proves the judge; it will register the node once there is one. |
 | A licence | None. There is no `LICENSE` file, the same as MotionCOPs, so default copyright applies. Ask before reusing the code. |
 
 The live record is [`docs/STATE.md`](docs/STATE.md). It is updated at the end of every working session.
 
-The [v0.0.0 pre-release](https://github.com/JosephOIbrahim/CVCOPS/releases/tag/v0.0.0) marks this point. It carries the explainer video and no installable node.
+The [v0.0.1 pre-release](https://github.com/JosephOIbrahim/CVCOPS/releases/tag/v0.0.1) marks this point. It carries the installer and no Houdini node. The explainer video is on [v0.0.0](https://github.com/JosephOIbrahim/CVCOPS/releases/tag/v0.0.0).
 
 ## How a bake works
 
@@ -143,17 +144,40 @@ Seventeen uses sit on the same two layers. **The temporal check comes first**: p
 
 None of that is built. Each item waits for v0.1, and each ML lane waits for a probe.
 
-## Try the judge today
+## Install
 
-You can run the tests that will judge the build, without Houdini. You need [`uv`](https://docs.astral.sh/uv/); it fetches Python 3.13 and the pinned packages.
+**One command sets up everything that exists today.** You need `git` and [`uv`](https://docs.astral.sh/uv/). `uv` fetches Python 3.13 and the pinned packages for you.
 
 ```bash
-uv sync
-uv run python tools/check.py --selftest
-uv run python evidence/opportunities_reference.py
+git clone https://github.com/JosephOIbrahim/CVCOPS.git
+cd CVCOPS
+uv run python tools/install.py
 ```
 
-The first command builds the worker's environment. The second proves the judge: the reference passes every row, and nine planted faults each fail. The third runs three small demonstrations of uses that come after v0.1.
+```mermaid
+flowchart LR
+  A["git clone"] --> B["tools/install.py"]
+  B --> C["1. Worker environment<br/>from the pinned lock file"]
+  C --> D["2. local.toml<br/>points at hython, if found"]
+  D --> E["3. Self-test<br/>proves the judge here"]
+  E --> F{"Is the node built?"}
+  F -- "not yet" --> G(["Stops here today"])
+  F -- "from v0.1" --> H(["Adds one Houdini package file"])
+```
+
+The installer is safe to run again. It only fills in what is missing.
+
+| It does | It never does |
+| --- | --- |
+| Build the worker's environment in `.venv` | Install anything into Houdini's Python |
+| Find the newest Houdini and write `local.toml` | Overwrite a `local.toml` you already have |
+| Run the judge's self-test, about 40 seconds | Change a system setting or ask for administrator rights |
+
+To see what it would do without changing anything, add `--check`. Other options are `--hython PATH`, `--no-houdini` and `--no-selftest`.
+
+You can also download `install.py` alone from the [latest pre-release](https://github.com/JosephOIbrahim/CVCOPS/releases) and run `uv run install.py`. It clones the repository first.
+
+There is no node to load into Houdini yet. From v0.1, the same command will register it.
 
 Plain `uv run python tools/check.py` fails until `judge.lock` exists. That is by design.
 
@@ -169,6 +193,7 @@ Plain `uv run python tools/check.py` fails until `judge.lock` exists. That is by
 | `src/cvcops/` | The engine: the contract, the operations, the worker command |
 | `tests/thresholds/` | The locked tests, one per threshold |
 | `tools/check.py` | The judge's front door |
+| `tools/install.py` | The installer |
 | `houdini/` | The asset's builder, its parameter spec and its tests |
 | `evidence/` | The scripts behind every number |
 | [`GOALS.md`](GOALS.md), [`CLAUDE.md`](CLAUDE.md) | How Claude Code works in this repository |

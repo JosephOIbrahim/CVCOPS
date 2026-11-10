@@ -2,7 +2,7 @@
   "schema": "cvcops.capabilities.v1",
   "engine": {
     "package": "cvcops",
-    "version": "0.0.0",
+    "version": "0.0.1",
     "contract": "flow-contract-v1",
     "receipt_schema": "cvcops.receipt.v1",
     "invoke": {"interpreter_env": "CVCOPS_WORKER_PYTHON", "module": "cvcops"}
