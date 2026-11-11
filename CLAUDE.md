@@ -14,7 +14,7 @@ State: `docs/STATE.md`. Read it first and update it last.
 - The reference the thresholds come from: `uv run python evidence/thresholds_reference.py`, and with `--faults`
 - One test: `uv run pytest tests/unit/test_contract.py -k cache_key -q`
 - Worker: `uv run python -m cvcops flow --help`. The manifest agents read: `uv run python -m cvcops capabilities`. The package file: `uv run python -m cvcops package --write <dir>`
-- Build assets: `hython houdini/build/build_hdas.py --out houdini/otls`, with `hython` taken from `local.toml`
+- Build assets: `uv run python probes/hython.py houdini/build/build_hdas.py --out houdini/otls` (hython from `local.toml`, run the judge's way: empty preferences, this package only)
 - Evolve lane: `uv run python evolve/flow_recipe/test_gaming.py`, then `sweep.py`, then `promote.py <program>`. OpenEvolve itself: `uv sync --group evolve`
 - Unattended run, started by Joe: `bash tools/unattended.sh M1`
 - Locking the judge (`tools/lock_judge.py`) is Joe's alone, run outside Claude. The kit ships the tool; do not rewrite it. A deny rule blocks any command that names `lock_judge`, `git add` included, so Joe commits that file.
@@ -57,7 +57,7 @@ State: `docs/STATE.md`. Read it first and update it last.
 - Stuck, a broken environment (exit 3), or a fix that would need a judge change: put `BLOCKED: <reason>` on the first line of `docs/STATE.md` and stop. Do not edit code to get around a broken environment. Only Joe removes `BLOCKED:`. Plain `check.py` fails while either line stands.
 - Done means the mission's command exits 0, and the command plus the tail of its output is pasted into `docs/STATE.md`.
 - Budget: one session per mission. A second needs a line in `docs/STATE.md` saying why. At a third, stop with `BLOCKED:`, because the plan is wrong.
-- No parallel agents. One read-only reviewer pass per mission is allowed: compare the diff against the mission in `docs/BLUEPRINT.md`, report correctness gaps, skip style.
+- Subagents, narrowly (OD-01, adopted 2026-11-10; `docs/missions/GRAPH.md`). Read-only subagents may run for lookups, checks and the one reviewer pass per mission (compare the diff against the mission in `docs/BLUEPRINT.md`, report correctness gaps, skip style), never during a timed run. At most one worktree writer at a time, in a sibling folder outside the repository (`../CVCOPS-lanes/<lane>`) that Joe adds with `/add-dir` in that session, never under `.claude/` and never by editing `.claude/settings.json`. It writes only files no other in-flight task writes, and runs only its own unit tests. A lane never commits, merges or pushes: the main session copies its files back, runs `uv run python tools/check.py` and removes the worktree. No subagent starts `hython`, writes `docs/STATE.md`, `docs/FACTS.md` or `README.md`, or waits on Joe. Unattended runs use no subagents. Anything wider needs Joe's OK.
 - Model tiers: Heavy = the default model at high effort. Light = sonnet at medium effort. To swap, edit this line and set `CVCOPS_LIGHT_MODEL`.
 - A new dependency, a new node, or anything outside the current mission: stop and ask.
 - Unattended runs (M1 and M2 only) start from `tools/unattended.sh`, which refuses unless the committed `mission.txt` lists the mission and the judge matches its lock: print mode, 60 turns, a worktree branch, nobody to approve a prompt. The launcher lists any judge file the run touched, and such a branch is not merged. Never `bypassPermissions`, and never `WAITING:` there.

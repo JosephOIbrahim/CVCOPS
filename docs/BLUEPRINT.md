@@ -204,7 +204,7 @@ On 100 fresh draws no row failed; the occlusion row came closest, 0.869 against 
 | `vendor/` is read-only | A deny rule | Upstream is not ours to change |
 | No install into Houdini's Python | Deny rules on `hython -m pip`, by any path to `hython`, and `check.py --houdini` fails if Houdini's site-packages listing changes from P1's record. It runs `hython` with a kit-owned preferences folder | Protects the install |
 | No `hou` import under `src/` | A unit test that scans imports | Keeps operations testable anywhere |
-| One mission per session, then `/clear`; evidence with every "done"; no Houdini GUI; no fan-out; model tiers | CLAUDE.md | Habits, not walls: evidence goes into `docs/STATE.md`, a viewport needs eyes, one reviewer pass per mission at most |
+| One mission per session, then `/clear`; evidence with every "done"; no Houdini GUI; narrow subagents only; model tiers | CLAUDE.md | Habits, not walls: evidence goes into `docs/STATE.md`, a viewport needs eyes, one reviewer pass per mission at most |
 
 The kit ships these rules as `.claude/settings.json`, so they hold from the first session; confirm them with `claude doctor` (the file passed on Claude Code 2.1.319), `/hooks` and `/permissions`. Rules match the text of a command and miss a script that writes a file, so they are guard rails and the lock is the check: it makes a judge change impossible to miss, not impossible. Only you lock, by running `tools/lock_judge.py` outside Claude and committing `judge.lock`.
 
