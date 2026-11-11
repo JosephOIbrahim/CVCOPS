@@ -174,3 +174,31 @@ def test_analysis_reader_refuses_a_multi_part_file(tmp_path):
         f.write(str(path))
     with pytest.raises(ContractError, match="multi-part"):
         read_analysis_exr(path)
+
+
+ROP_IMAGE_FIXTURE = os.path.join(os.path.dirname(__file__), "fixtures", "rop_image_analysis.exr")
+
+
+def test_rop_image_analysis_export_reads_to_the_expected_levels():
+    """M3.io.reader_pin: a 32x32 frame ROP Image wrote through cvcops::flow::1.0's own export on 22.0.492
+    (probes/m3_reader_pin.py), committed byte for byte. The source was R = G = B = k / 255 with k = (7x + 3y) mod 256,
+    at the asset's defaults (Rec. 709 weights, gain 1, gamma 1, scale 1.0), so the reader must return k exactly."""
+    report = []
+    got = read_analysis_exr(ROP_IMAGE_FIXTURE, report)
+    ys, xs = np.mgrid[0:32, 0:32]
+    assert got.dtype == np.uint8 and np.array_equal(got, ((7 * xs + 3 * ys) % 256).astype(np.uint8))
+    assert report == []
+
+
+def test_rop_image_analysis_export_layout_is_pinned():
+    """What ROP Image wrote (FACTS H34): one part, scanline, ZIP, R, G and B as FLOAT, equal windows of 32x32."""
+    with OpenEXR.File(ROP_IMAGE_FIXTURE, separate_channels=True) as f:
+        header = {k: f.header()[k] for k in ("dataWindow", "displayWindow", "compression", "type")}
+        channels = {name: c.pixels.copy() for name, c in f.channels().items()}
+        assert len(f.parts) == 1
+    assert sorted(channels) == ["B", "G", "R"]
+    assert all(c.dtype == np.float32 and c.shape == (32, 32) for c in channels.values())
+    assert np.array_equal(channels["R"], channels["G"]) and np.array_equal(channels["R"], channels["B"])
+    for window in ("dataWindow", "displayWindow"):
+        assert [list(map(int, v)) for v in header[window]] == [[0, 0], [31, 31]]
+    assert header["compression"] == OpenEXR.ZIP_COMPRESSION and header["type"] == OpenEXR.scanlineimage
