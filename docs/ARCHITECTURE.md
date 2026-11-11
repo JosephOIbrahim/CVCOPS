@@ -35,6 +35,21 @@ rather than around it.
 | The worker, one per bake | `python -m cvcops flow` | OpenCV, NumPy, OpenEXR | `hou`, SYNAPSE, the evidence scripts, the tests (a guard test scans `src/`) |
 | SYNAPSE | Its own agent, and an adapter that calls the worker | Whatever SYNAPSE loads | The engine's Python, in Houdini's process |
 
+## The worker's promises (Mission 2, decision 0004)
+
+| What | Promise |
+| --- | --- |
+| Call | `python -m cvcops flow --in <cache>/analysis.####.exr --out <cache> --frames f1-f2 --recipe R --backend B --tolerance T`. The `#` run is zero-padded; pair `a` writes `flow.<a>.exr` (R = u, G = v in `opencv_px`, B = valid; float32, ZIP, at analysis size, never resized), then `flow.<a>.json` last. |
+| Writes | Only inside `--out`, each file through a temporary name starting with a dot, then `os.replace` (retried about a second on Windows). A fresh pair is skipped; there is no force flag, so a recompute means a fresh folder. |
+| Exit codes | 0 every pair written or fresh. 1 a pair failed, or the request was refused before anything was written (missing frames, a bad pattern or range, a bad sidecar, `--backend opencl` or `cuda` with a device present). 3 no OpenCV or OpenEXR, or no device for the requested backend; the cpu backend is never substituted. A bad argument is 1, not argparse's 2. An interrupt (Ctrl-C, a cancelled bake) ends the process with the platform's interrupt status; the atomic writes leave no half-written file, and the interrupted pair reads as missing. |
+| Error receipts | A failure before both frames are hashed and read writes nothing for that pair. A later one removes the pair's old flow file and writes `status: error` with the reason; the run goes on. |
+| Progress | One line per pair on stdout, flushed at once: `flow <a>-<b> ok <seconds>s`, `skip fresh` or `error`. Reasons go to stderr. |
+| Timings | `timings_s`: `read`, `hash`, `flow` (forward DIS), `validity` (backward DIS plus the check), `write` (flow file and its hash), `total`. Flow compute = flow + validity; worker I/O = read + hash + write. |
+| Cache key | `contract.cache_key` over the two frame digests, `params.digest` (tolerance, mask, and the line-ending-normalised source hashes of the reader, `estimate_flow` and the validity code), the recipe's source hash, the backend, `cv2.__version__` and the SHA-256 of `cv2.getBuildInformation()`. Not threads, not the engine version, not the folder. |
+| `verify` | Same `--in`, `--out`, `--frames`; optional `--recipe`, `--backend`, `--tolerance` (unset: as each receipt recorded). Writes nothing. Exit 0 all fresh, 1 otherwise, 3 broken environment. `--json` prints `{"frames": {"first", "last"}, "counts": {"fresh", "stale", "missing"}, "pairs": [{"a", "b", "state", "reason"}]}`. Missing: no receipt or no flow file. Stale: an unreadable or failed receipt, an input gone, another cache key, or a flow file that differs from its receipt. |
+| Sidecar | `<prefix>.json` beside the frames (`analysis.json` for `analysis.####.exr`), schema `cvcops.analysis_sidecar.v1`: `{"schema", "analysis": {"luminance_weights", "gain", "gamma", "scale", "color_space"}, "frame": {"fps"}}`, every key optional. No file means scale 1.0, the source as given, the rest null. Anything else is refused. |
+| Analysis frames | One channel of any name, or R = G = B (bare or under one layer prefix); alpha ignored; FLOAT or HALF; a data window wider than the display window is cropped. Read as `rint(x * 255)` clipped to 0-255. |
+
 ## Where everything lives
 
 | Path | What it is | Written by | Locked |

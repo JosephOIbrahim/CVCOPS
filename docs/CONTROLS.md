@@ -52,6 +52,9 @@ Mission 3, which also takes Joe's word on every label and default.
 5. **No control changes the stored convention.** Scale, sign and units are applied once, in the conversion node.
 6. **A control that changes nothing is noise.** Each one maps to a prep step, a worker option, an action or a
    receipt field, and the test checks that it does.
+7. **Analysis values reach the receipt through the sidecar.** Luminance Weights, Gain, Gamma and Analysis Scale
+   are not worker options: the export writes them to `analysis.json` beside the frames
+   (`cvcops.analysis_sidecar.v1`, decision 0004), and the worker copies them into each receipt.
 
 ## Planned, not built
 

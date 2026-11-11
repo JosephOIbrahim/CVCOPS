@@ -22,14 +22,17 @@
     },
     {
       "name": "verify",
-      "status": "planned",
+      "status": "available",
       "milestone": "v0.1, Mission 2",
       "summary": "Report each frame pair as fresh, stale or missing from its receipt and cache key, without computing any flow.",
-      "argv": ["verify", "--in", "{analysis_pattern}", "--out", "{out_dir}", "--frames", "{frames}", "--json"],
+      "argv": ["verify", "--in", "{analysis_pattern}", "--out", "{out_dir}", "--frames", "{frames}", "--recipe", "{recipe}", "--backend", "{backend}", "--tolerance", "{tolerance}", "--json"],
       "inputs": [
         {"name": "analysis_pattern", "kind": "path_pattern", "description": "Grey analysis frames exported by Houdini, such as bake/analysis.####.exr"},
         {"name": "out_dir", "kind": "path", "description": "Folder that holds the flow files and receipts"},
-        {"name": "frames", "kind": "frame_range", "description": "First and last frame A, such as 1001-1100; each pairs with the next frame"}
+        {"name": "frames", "kind": "frame_range", "description": "First and last frame A, such as 1001-1100; each pairs with the next frame"},
+        {"name": "recipe", "kind": "choice", "description": "The recipe the flow must have run with; omit the flag to use each receipt's own", "choices": ["dis_medium", "dis_fast"]},
+        {"name": "backend", "kind": "choice", "description": "The backend the flow must have run on; omit the flag to use each receipt's own", "choices": ["cpu", "opencl", "cuda"]},
+        {"name": "tolerance", "kind": "number", "description": "The validity tolerance in pixels the flow must have used; omit the flag to use each receipt's own"}
       ],
       "outputs": [{"pattern": "stdout", "kind": "stdout_json"}],
       "effects": {"reads": ["analysis_pattern", "out_dir"], "writes": [], "scene": "none", "network": "none", "gpu": "none"},
@@ -38,16 +41,17 @@
     },
     {
       "name": "flow",
-      "status": "planned",
+      "status": "available",
       "milestone": "v0.1, Mission 2",
       "summary": "Forward optical flow from each analysis frame to the next, with a validity channel and a receipt per pair.",
-      "argv": ["flow", "--in", "{analysis_pattern}", "--out", "{out_dir}", "--frames", "{frames}", "--recipe", "{recipe}", "--backend", "{backend}"],
+      "argv": ["flow", "--in", "{analysis_pattern}", "--out", "{out_dir}", "--frames", "{frames}", "--recipe", "{recipe}", "--backend", "{backend}", "--tolerance", "{tolerance}"],
       "inputs": [
         {"name": "analysis_pattern", "kind": "path_pattern", "description": "Grey analysis frames exported by Houdini, such as bake/analysis.####.exr"},
         {"name": "out_dir", "kind": "path", "description": "Folder the flow files and receipts are written to; nothing is written anywhere else"},
         {"name": "frames", "kind": "frame_range", "description": "First and last frame A, such as 1001-1100; each pairs with the next frame"},
         {"name": "recipe", "kind": "choice", "description": "A named flow recipe", "choices": ["dis_medium", "dis_fast"], "default": "dis_medium"},
-        {"name": "backend", "kind": "choice", "description": "Where it runs; an unavailable backend is an error, never a quiet substitute", "choices": ["cpu", "opencl", "cuda"], "default": "cpu"}
+        {"name": "backend", "kind": "choice", "description": "Where it runs; an unavailable backend is an error, never a quiet substitute. v0.1 runs cpu only: opencl and cuda exit 3 with no device and 1 with one", "choices": ["cpu", "opencl", "cuda"], "default": "cpu"},
+        {"name": "tolerance", "kind": "number", "description": "Validity tolerance in pixels: forward-backward disagreement above it marks a pixel invalid", "default": 1.0}
       ],
       "outputs": [
         {"pattern": "flow.####.exr", "kind": "flow_exr"},
@@ -55,7 +59,7 @@
       ],
       "effects": {"reads": ["analysis_pattern"], "writes": ["out_dir"], "scene": "none", "network": "none", "gpu": "when_requested"},
       "guard": "verify",
-      "exit_codes": {"0": "every pair written or already fresh", "1": "a pair failed; its receipt says why", "3": "broken environment"}
+      "exit_codes": {"0": "every pair written or already fresh", "1": "a pair failed (its receipt says why), or the request was refused before anything was written", "3": "broken environment: no OpenCV or OpenEXR, or no device for the requested backend"}
     },
     {
       "name": "temporal_check",
