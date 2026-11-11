@@ -351,3 +351,17 @@ def test_the_command_line_needs_exactly_one_action(capsys):
     assert e.value.code == 2
     with pytest.raises(SystemExit):
         br.main(["--check", "x.json", "aggregate", "--in", "a", "--write", "b"])
+
+
+# ---- the committed receipt --------------------------------------------------------------------------------------
+COMMITTED = ROOT / "docs" / "facts" / "m3_bake_receipt.json"
+
+
+def test_the_committed_receipt_rederives_from_its_own_runs():
+    """docs/facts/m3_bake_receipt.json: five runs, and medians and ratio that its runs give (never live files)."""
+    receipt = json.loads(COMMITTED.read_text(encoding="utf-8"))
+    assert receipt["schema"] == "cvcops.bake.v1" and receipt["n"] == 5 and len(receipt["runs"]) == 5
+    rebuilt = br.check_receipt(receipt)
+    assert rebuilt["medians_s"] == receipt["medians_s"] and rebuilt["quarter"] == receipt["quarter"]
+    assert receipt["workload"]["pairs"] == 24 and receipt["workload"]["size"] == [1920, 1080]
+    assert not br._absolute_paths(receipt)
