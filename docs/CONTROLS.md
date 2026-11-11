@@ -18,7 +18,7 @@ schema. To add or change a control, edit that file. Never edit the built asset.
 | Flow | Recipe | The named flow recipe, from `contract.RECIPES` | `dis_medium` |
 | Flow | Backend | `cpu`, `opencl` or `cuda`. An unavailable one is an error, never a quiet substitute | `cpu` |
 | Flow | Validity Tolerance | Pixels of forward-backward disagreement allowed (FACTS M14) | 1.0 |
-| Bake | Frame Range | First and last frame; the export writes one extra frame | The scene's range |
+| Bake | Frame Range | First and last frame; the export writes one extra frame | `$FSTART` to `$FEND-1`, so the last baked frame has a successor |
 | Bake | Cache Folder | Holds the analysis frames, the flow files and the receipts | `$HIP/cvcops/$OS` |
 | Bake | Bake | Exports, runs the worker once for the range, loads the result | Button |
 | Bake | Check Cache | Asks the worker which frames are fresh, stale or missing | Button |

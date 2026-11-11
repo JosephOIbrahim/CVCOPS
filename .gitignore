@@ -16,3 +16,5 @@ cvcops-repo.zip
 docs/media/*.mp4
 docs/media/out/
 docs/media/fonts/
+# built by houdini/build/build_hdas.py under each user's own licence (OD-15); never committed
+houdini/otls/
