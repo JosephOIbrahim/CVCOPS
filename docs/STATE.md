@@ -1,4 +1,3 @@
-WAITING: Joe's Start M4 sitting is in progress: tests/thresholds/conftest.py carries the crash-line fix and is not yet locked; next Joe runs check.py --selftest, adds M4 to mission.txt, locks outside Claude and commits 'Start M4'. Claude removes this line after that commit.
 # State
 
 Updated 2026-11-11. This is the capsule: the next session resumes from here.
