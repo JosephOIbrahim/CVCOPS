@@ -159,9 +159,12 @@ def main():
     frange = tuple(int(v) for v in flow.parmTuple("frange").eval())
     cache = flow.parm("cache_dir").evalAsString()
     print(f"Frame Range from the asset's default: {frange}; cache {os.path.relpath(cache, out)}")
-    from cvcops_houdini import bake as bake_mod
+    from cvcops_houdini import bake as bake_mod, worker as worker_mod
     try:
         times = bake_mod.bake(flow, names()["env_prefix"])
+    except worker_mod.WorkerEnvironmentError as e:
+        print(f"build_scene.py: the worker cannot start: {e}", file=sys.stderr)
+        return 3
     except bake_mod.BakeError as e:
         print(f"build_scene.py: the bake failed: {e}", file=sys.stderr)
         return 3 if e.code == 3 else 1

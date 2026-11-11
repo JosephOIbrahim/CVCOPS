@@ -110,7 +110,7 @@ def main():
     sys.path.insert(0, str(ROOT / "houdini" / "build"))
     import build_scene
     import stamp as stamp_mod
-    from cvcops_houdini import bake as bake_mod
+    from cvcops_houdini import bake as bake_mod, worker as worker_mod
 
     names = build_scene.names()
     tname = f"{names['hda_namespace']}::{names['hda_flow']}::1.0"
@@ -147,6 +147,8 @@ def main():
     t0 = time.perf_counter()
     try:
         timings = bake_mod.bake(node, names["env_prefix"])
+    except worker_mod.WorkerEnvironmentError as e:
+        return fail(f"the worker cannot start: {e}", 3)
     except bake_mod.BakeError as e:
         return fail(f"the bake failed: {e}", 3 if e.code == 3 else 1)
     t_cooks = time.perf_counter()

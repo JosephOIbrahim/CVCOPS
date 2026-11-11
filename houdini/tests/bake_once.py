@@ -69,9 +69,12 @@ def flow(hou, d, preset, scale):
     node.parm("cache_dir").set(os.path.join(d, "cache").replace("\\", "/"))
 
     sys.path.insert(0, str(ROOT / "houdini" / "python3.13libs"))
-    from cvcops_houdini import bake as bake_mod
+    from cvcops_houdini import bake as bake_mod, worker as worker_mod
     try:
         bake_mod.bake(node, n["env_prefix"])
+    except worker_mod.WorkerEnvironmentError as e:
+        print(f"bake_once.py: the worker cannot start: {e}", file=sys.stderr)
+        return 3
     except bake_mod.BakeError as e:
         print(f"bake_once.py: {e}", file=sys.stderr)
         return 3 if e.code == 3 else 1
