@@ -26,21 +26,18 @@ For every pixel in a frame, it answers two questions. The first is where that pi
 
 ## Where it stands
 
-**This is a pre-release. The Houdini node is not built yet.** What exists today is the contract, the tests that will judge the build, and proof that those tests work.
+**v0.1 is being finished, not released.** The judge, the worker and the Houdini asset are built and proven, and the
+release gate is open. One mission is left before it: the live lane.
 
-| Part | State on 10 November 2026 |
+| Part | State on 12 November 2026 |
 | --- | --- |
-| The judge: threshold tests and `tools/check.py` | Built. Its self-test passes the reference on every row and catches all nine planted faults, on Linux and on Windows. |
-| Mission 0: probes on a real workstation | Done. Frames cross Houdini's File COP and ROP Image bit for bit, and the judge is locked. |
-| The flow operation and the worker command | Not built. Missions 1 and 2. Mission 1 is next. |
-| The Houdini asset, `cvcops::flow::1.0` | Not built. Mission 3. Its 14 parameters are specified in `houdini/build/controls.json`, and a dry run builds them all in Houdini 22. |
-| The warp example | Not built. Mission 4. |
-| The installer, `tools/install.py` | Built. It sets up the worker and proves the judge; it will register the node once there is one. |
-| A licence | None. There is no `LICENSE` file, the same as MotionCOPs, so default copyright applies. Ask before reusing the code. |
-
-The live record is [`docs/STATE.md`](docs/STATE.md). It is updated at the end of every working session.
-
-The [v0.0.1 pre-release](https://github.com/JosephOIbrahim/CVCOPS/releases/tag/v0.0.1) marks this point. It carries the installer and no Houdini node. The explainer video is on [v0.0.0](https://github.com/JosephOIbrahim/CVCOPS/releases/tag/v0.0.0).
+| The judge: threshold tests and `tools/check.py` | Built and locked. Its self-test passes the reference on every row and catches all nine planted faults; rung 2 passes three rows through the asset |
+| Mission 0: probes on a real workstation | Done. Frames cross Houdini's File COP and ROP Image bit for bit |
+| M1 to M4: the flow operation, the worker command, the Houdini asset and the pull | Done and closed. `two_region` reads 0.037 px at analysis scale 1.0 and 0.115 px at 0.5; the pull reads 1.0023 levels against a 1.5 limit |
+| The example: a two-region plate, a carry, a look | Done. A painted mark carried eight frames back from a key frame tracks the plate to 0.33 px |
+| M5, the live lane | Not built. The brief is adopted and starts after M4 |
+| The installer, `tools/install.py` | Built. It sets up the worker, writes `local.toml`, runs the self-test, builds the asset under your own licence, and writes one package file |
+| A licence | None. There is no `LICENSE` file, the same as MotionCOPs, so default copyright applies |
 
 ## How a bake works
 
@@ -63,7 +60,7 @@ flowchart LR
   E --> G(["valid, a Mono layer"])
 ```
 
-The worker runs in its own Python environment, on one stock OpenCV wheel. Nothing is installed into Houdini's Python.
+The worker runs in its own Python environment, on one OpenCV wheel: `opencv-contrib-python-headless`, pinned in `uv.lock`. Nothing is installed into Houdini's Python.
 
 Every flow file comes with a receipt. The receipt records what ran, on which backend, with which settings, so a cached frame can be checked instead of trusted.
 
@@ -94,14 +91,15 @@ flowchart LR
   M0["M0<br/>Probes, self-test, lock"] --> M1["M1<br/>Flow operation"]
   M1 --> M2["M2<br/>Worker command"]
   M2 --> M3["M3<br/>Houdini node"]
-  M3 --> M4["M4<br/>Warp"]
-  M4 --> R(["v0.1"])
+  M3 --> M4["M4<br/>Pull and carry"]
+  M4 --> M5["M5<br/>Live lane"]
+  M5 --> R(["v0.1"])
   R -.-> T["Temporal check"]
   R -.-> ML["ML lanes, each behind a gate"]
   classDef done fill:#2E2B28,color:#ffffff,stroke:#2E2B28
   classDef now fill:#C8321A,color:#ffffff,stroke:#C8321A
-  class M0 done
-  class M1 now
+  class M0,M1,M2,M3,M4 done
+  class M5 now
 ```
 
 Claude Code does the building, one mission per session. The thresholds were measured first, written as tests, and are locked by the owner before each mission starts.
@@ -121,7 +119,7 @@ flowchart LR
 
 ## Measured so far
 
-**Every number below comes from a script in `evidence/`, and each has an entry in [`docs/FACTS.md`](docs/FACTS.md).**
+**Every number below comes from a script in `evidence/` or `probes/`, and each has an entry in [`docs/FACTS.md`](docs/FACTS.md). The release's own plate numbers came from the owner running the same commands on his machine, and FACTS says so.**
 
 | What was measured | Result | Where |
 | --- | --- | --- |
@@ -152,7 +150,7 @@ Every line here is a measured limit, not a caveat. The evidence is in [`docs/FAC
 
 | Limit | Why | Evidence |
 | --- | --- | --- |
-| **CPU only in v0.1.** `opencl` and `cuda` are refused before any work | no v0.1 recipe is graded on a GPU; the refusal writes nothing | FACTS M2, decision 0004(d); `docs/STATE.md`'s DEC.quarter line |
+| **CPU only in v0.1.** `opencl` and `cuda` are refused before any work | no v0.1 recipe is graded on a GPU; the refusal writes nothing | decision 0004(d); `docs/STATE.md`'s DEC.quarter line; the receipt's `backend` field |
 | **Forward flow only.** A fix travels to earlier frames, never later ones | the cache holds flow from A to B; there is no backward pair | M4's carry example, FACTS H40 |
 | **Validity is a flag, not a mask.** It misses narrow occlusions | forward-backward agreement fails on thin occluders | FACTS M12 to M14 |
 | **DIS patch size at most 16 px** before OpenCV 5.1 | the OpenCV release notes; larger patches misbehave | `CLAUDE.md`, gotchas |
@@ -163,7 +161,7 @@ Every line here is a measured limit, not a caveat. The evidence is in [`docs/FAC
 | **Distort is the pull.** Pixels per Step off matches `cv2.remap`; on drifts | measured on twelve pairs and a 149 px field | FACTS H38 |
 | **An asset built under Indie is limited commercial**, so `install.py` builds it under your own licence | SideFX's licence terms; no `.hda` ships | FACTS P7; decision 0005 |
 | **A carried fix left of 1016 in the example shows the 1016 mark** | the Switch clamps at the first carried step | M4's close entry |
-| **Windows 11 and Houdini 22.0.492** are what is tested | every number here came from that pair | FACTS P1, and every row's own line |
+| **Windows 11 and Houdini 22.0.492** are what is tested | the synthetic rows were first measured on a 2-thread Linux sandbox (M14, M15, M17; FACTS says which) and re-measured here; the plate and the asset rows came from this workstation | FACTS P1, and each row's own line |
 | **Thresholds come from synthetic frames plus one owner plate** | the locked rows are synthetic; the plate is evidence, not a row | `tests/thresholds/`, `docs/facts/rel_plate_summary.json` |
 | **No licence file.** Default copyright applies | Joe's decision at the release plan | OD-29; decision 0005 |
 
@@ -185,9 +183,10 @@ flowchart LR
   B --> C["1. Worker environment<br/>from the pinned lock file"]
   C --> D["2. local.toml<br/>points at hython, if found"]
   D --> E["3. Self-test<br/>proves the judge here"]
-  E --> F{"Is the node built?"}
-  F -- "not yet" --> G(["Stops here today"])
-  F -- "from v0.1" --> H(["Adds one Houdini package file"])
+  E --> F{"Asset built,<br/>stamp matching?"}
+  F -- "yes" --> H(["6. One package file<br/>where Houdini reads it"])
+  F -- "no, or --force" --> G["5. Build the asset<br/>under your licence"]
+  G --> H
 ```
 
 The installer is safe to run again. It only fills in what is missing.
@@ -197,12 +196,14 @@ The installer is safe to run again. It only fills in what is missing.
 | Build the worker's environment in `.venv` | Install anything into Houdini's Python |
 | Find the newest Houdini and write `local.toml` | Overwrite a `local.toml` you already have |
 | Run the judge's self-test, about 40 seconds | Change a system setting or ask for administrator rights |
+| Build the asset under your licence when it is missing or its stamp differs | Commit or ship a built `.hda` |
+| Write one package file, and print its path for you to confirm | Install anything into Houdini's Python |
 
 To see what it would do without changing anything, add `--check`. Other options are `--hython PATH`, `--no-houdini` and `--no-selftest`.
 
 You can also download `install.py` alone from the [latest pre-release](https://github.com/JosephOIbrahim/CVCOPS/releases) and run `uv run install.py`. It clones the repository first.
 
-There is no node to load into Houdini yet. From v0.1, the same command will register it.
+The package file is what makes the node appear: after installing, `cvcops::flow::1.0` is in Copernicus's Tab menu. Remove it by deleting that one file.
 
 The repository carries the owner's `judge.lock`. Plain `uv run python tools/check.py` passes only while the locked tests are unchanged. That is by design.
 

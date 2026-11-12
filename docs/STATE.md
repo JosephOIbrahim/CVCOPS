@@ -216,3 +216,17 @@ Add one entry per mission: the date, the command that closed it, and the tail of
   three rung-2 rows PASS (0.037421 / 0.11525 / 1.0023 levels), medians total 21.146 s and flow_compute 5.783 s with the
   quarter at 0.2735, and the plate at gain 0.5 gamma 2.2 with 2.4% clipped, 61 grey levels and no warnings. FACTS R2;
   `evidence/README.md` lists the script beside `package_install_check.py`. Nothing is written by either run.
+- 2026-11-12, `REL.judge.readme_audit`, the release's one reviewer pass over the README. Traced every command, number
+  and limit to its source. Twelve gaps, all fixed or noted: the status block still said the node was not built and the
+  table dated itself 10 November with M1 to M4 unbuilt (README contradicted STATE on the whole project); the mission
+  chain drew M4 straight to v0.1 and marked M1 as current, omitting M5; the Install section said "there is no node to
+  load into Houdini yet" and the flow stopped at a "not yet" branch, though install.py has built and registered the asset
+  since the release nodes; `--packages` and `--force` were missing from the option list; "one stock OpenCV wheel" is
+  really the contrib wheel pinned in `uv.lock`; the Limits row for CPU-only cited FACTS M2, which measures DIS accuracy --
+  the backing is decision 0004(d), STATE's DEC.quarter line and the receipt's `backend` field; and "every number here came
+  from that pair" ignored that M14, M15 and M17 were measured on the 2-thread Linux sandbox. The two "every number comes
+  from evidence/" claims now say `evidence/` or `probes/`, and name the plate as the owner's own run. Everything the
+  audit traced and found correct: all five commands and their flags, the measured table against FACTS, the judge's nine
+  planted faults, the 14 v0.1 controls, thirteen of the fifteen Limits rows, the 17 uses, and no claim anywhere that
+  v0.1 is released, tagged or published. `docs/facts/rel_plate_summary.json` was untracked when the audit read it; it is
+  committed now.
