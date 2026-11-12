@@ -165,7 +165,7 @@ def render_carry(hou, nodes, out, key=1024, steps=8):
     over.setInput(1, sw, 0)
     over.parm("mode").set("over")
     net.layoutChildren()
-    for frame in range(key - steps, key + 1):
+    for frame in range(key - steps, key + 2):      # one past the key, to show the fix stops there
         render(hou, net, over, f"$HIP/renders/carry.{frame}.exr", frame)
     hou.setFrame(key - steps)
     print(f"carried {steps} steps back from {key} and rendered {key - steps}-{key}")

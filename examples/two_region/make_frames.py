@@ -153,6 +153,15 @@ def check_carry(frames_dir, renders_dir):
         rows.append({"frame": number, "centroid": [cx, cy], "truth": [tx, ty], "error_px": err})
         print(f"{number}: centroid ({cx:7.2f}, {cy:7.2f}) truth ({tx:7.2f}, {ty:7.2f}) error {err:5.2f} px"
               + ("  (key: the mark as painted)" if number == KEY_FRAME else ""))
+    after = os.path.join(renders_dir, f"carry.{KEY_FRAME + 1}.exr")
+    if os.path.isfile(after):
+        with OpenEXR.File(after, separate_channels=True) as f:
+            ch = {k: v.pixels for k, v in f.channels().items()}
+        r, b = (np.asarray(ch[k], np.float32) for k in ("R", "B"))
+        found = int(((r - b > 0.25) & (r > 0.25)).sum())
+        print(f"{KEY_FRAME + 1}: {found} mark pixels (the fix must stop at the key: only forward flow is baked)")
+        if found:
+            return 1
     print(f"worst {worst:.2f} px over {len(rows)} frames")
     return 0 if worst <= 0.5 else 1
 
