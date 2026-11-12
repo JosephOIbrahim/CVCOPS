@@ -124,6 +124,54 @@ def check_medians(flow_dir, truth):
     return worst, rows
 
 
+def render_carry(hou, nodes, out, key=1024, steps=8):
+    """Carry the mark back from the key frame and render 1016-1024.
+
+    Step k pulls the previous step's image with the flow of frame key-k, taken from the asset's flow output by a Time
+    Shift. A Switch on `key - $F` picks the step, and Blend Over puts it on the plate. Frames after the key show no fix,
+    because only forward flow is baked.
+    """
+    import sys as _sys
+    _sys.path.insert(0, str(ROOT / "houdini" / "python3.13libs"))
+    from cvcops_houdini import pull as pull_mod
+
+    net = nodes["net"]
+    plate = nodes["frames"]
+    flow = nodes["flow"]
+    fix_path = os.path.join(out, "fix", f"fix.{key}.exr")
+    if not os.path.isfile(hou.text.expandString(fix_path).replace("\\", "/")):
+        print(f"build_scene.py: no fix image at {fix_path}; run make_frames.py --fix", file=sys.stderr)
+        return 1
+    prev = raw_file(net, "fix_src", "$HIP/fix/fix.$F4.exr", "raw")
+    prev.parm("filename").set("$HIP/fix/fix.%04d.exr" % key)
+    prev.parm("type1").set("vector4")          # RGBA: the mark carries its own alpha
+    sw = net.createNode("switch", "carry_switch")
+    sw.setInput(0, plate, 0)                   # before the key: no fix
+    sw.setInput(1, prev, 0)                    # the key frame itself: the mark as painted
+    for k in range(1, steps + 1):
+        frame = key - k
+        ts = net.createNode("timeshift", f"ts_{frame}")
+        ts.setInput(0, flow, 0)
+        try:
+            ts.parm("mode").set("custom")
+        except Exception:
+            pass
+        ts.parm("frame").set(frame)
+        prev = pull_mod.pull_network(net, prev, ts, name=f"carry_{frame}")
+        sw.setInput(k + 1, prev, 0)
+    sw.parm("input").setExpression(f"clamp({key + 1} - $F, 0, {steps + 1})")
+    over = net.createNode("blend", "carry_over")
+    over.setInput(0, plate, 0)
+    over.setInput(1, sw, 0)
+    over.parm("mode").set("over")
+    net.layoutChildren()
+    for frame in range(key - steps, key + 1):
+        render(hou, net, over, f"$HIP/renders/carry.{frame}.exr", frame)
+    hou.setFrame(key - steps)
+    print(f"carried {steps} steps back from {key} and rendered {key - steps}-{key}")
+    return 0
+
+
 def main():
     try:
         import hou
@@ -134,6 +182,8 @@ def main():
     ap.add_argument("--out", default=str(OUT), help="the scene folder ($HIP); frames are read from <out>/frames")
     ap.add_argument("--check", action="store_true", help="require the median motions within 0.1 px of the truth")
     ap.add_argument("--save", action="store_true", help="save the scene into --out (Joe's go-ahead, OD-16)")
+    ap.add_argument("--carry", action="store_true",
+                    help="carry the OD-21 mark back from the key frame and render 1016-1024")
     args = ap.parse_args()
     out = os.path.abspath(args.out)
     frames_dir = os.path.join(out, "frames")
@@ -170,6 +220,10 @@ def main():
         return 3 if e.code == 3 else 1
     print("bake: " + ", ".join(f"{k} {v:.2f} s" for k, v in times.items()))
 
+    if args.carry:
+        code = render_carry(hou, nodes, out)
+        if code:
+            return code
     renders = os.path.join(out, "renders")
     os.makedirs(renders, exist_ok=True)
     for frame in RENDER_FRAMES:

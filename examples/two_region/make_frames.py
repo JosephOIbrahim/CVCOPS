@@ -28,6 +28,11 @@ CENTER = (W * 0.55, H * 0.5)
 PAD = 256                           # more than the 24 frames of motion, so sampling never leaves the canvas
 TINT_BG = (1.0, 0.93, 0.84)
 TINT_FG = (0.78, 0.9, 1.0)
+MARK_COLOUR = (1.0, 0.45, 0.05)      # Joe's OD-21 look: saturated orange
+MARK_RADIUS = 40.0                    # px
+MARK_SOFT = 10.0                      # px of soft edge
+KEY_FRAME = 1024
+CARRY_STEPS = 8                       # 1016 to 1023
 
 
 def texture(h, w, seed):
@@ -64,7 +69,15 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--out", default=str(ROOT / "examples" / "two_region" / "out" / "frames"))
     ap.add_argument("--seed", type=int, default=5)
+    ap.add_argument("--fix", action="store_true", help="paint the OD-21 mark on the disc at the key frame")
+    ap.add_argument("--check-carry", metavar="RENDERS", nargs="?", const="", default=None,
+                    help="check the carried mark's centroid against the disc's true motion")
     args = ap.parse_args(argv)
+    if args.check_carry is not None:
+        return check_carry(args.out, args.check_carry or os.path.join(ROOT, "examples", "two_region", "out",
+                                                                     "renders"))
+    if args.fix:
+        return write_fix(args.out)
     os.makedirs(args.out, exist_ok=True)
     tb = texture(H + 2 * PAD, W + 2 * PAD, args.seed)
     tf = texture(H + 2 * PAD, W + 2 * PAD, args.seed + 1000)
@@ -83,6 +96,65 @@ def main(argv=None):
         json.dump(truth, f, indent=2)
     print(f"wrote {LAST - FIRST + 1} frames {FIRST}-{LAST} at {W}x{H} and truth.json")
     return 0
+
+
+def disc_centre(number):
+    """The disc's centre at a frame, in opencv pixels."""
+    t = number - FIRST
+    return CENTER[0] + t * T_FG[0], CENTER[1] + t * T_FG[1]
+
+
+def write_fix(frames_dir):
+    """Paint the mark: a premultiplied RGBA EXR at the key frame, transparent except on the disc."""
+    import numpy as np
+    import OpenEXR
+    out = os.path.join(os.path.dirname(frames_dir.rstrip("/\\")), "fix")
+    os.makedirs(out, exist_ok=True)
+    ys, xs = np.mgrid[0:H, 0:W].astype(np.float32)
+    cx, cy = disc_centre(KEY_FRAME)
+    d = np.sqrt((xs - cx) ** 2 + (ys - cy) ** 2)
+    alpha = np.clip((MARK_RADIUS + MARK_SOFT - d) / MARK_SOFT, 0.0, 1.0).astype(np.float32)
+    header = {"compression": OpenEXR.ZIP_COMPRESSION, "type": OpenEXR.scanlineimage}
+    path = os.path.join(out, f"fix.{KEY_FRAME}.exr")
+    with OpenEXR.File(header, {"R": np.ascontiguousarray(alpha * MARK_COLOUR[0]),
+                              "G": np.ascontiguousarray(alpha * MARK_COLOUR[1]),
+                              "B": np.ascontiguousarray(alpha * MARK_COLOUR[2]),
+                              "A": np.ascontiguousarray(alpha)}) as f:
+        f.write(path)
+    with open(os.path.join(out, "mark.json"), "w", encoding="utf-8") as f:
+        json.dump({"key_frame": KEY_FRAME, "centre": [cx, cy], "radius": MARK_RADIUS, "soft": MARK_SOFT,
+                   "colour": list(MARK_COLOUR), "steps": CARRY_STEPS}, f, indent=2)
+    print(f"wrote {path}: radius {MARK_RADIUS} px, soft {MARK_SOFT} px, centred ({cx:.1f}, {cy:.1f}) at {KEY_FRAME}")
+    return 0
+
+
+def check_carry(frames_dir, renders_dir):
+    """The carried mark's centroid against the disc's true centre, in full-resolution pixels."""
+    import numpy as np
+    import OpenEXR
+    worst, rows = 0.0, []
+    for number in range(KEY_FRAME - CARRY_STEPS, KEY_FRAME + 1):
+        path = os.path.join(renders_dir, f"carry.{number}.exr")
+        if not os.path.isfile(path):
+            print(f"missing {path}", file=sys.stderr)
+            return 1
+        with OpenEXR.File(path, separate_channels=True) as f:
+            ch = {k: v.pixels for k, v in f.channels().items()}
+        r, g, b = (np.asarray(ch[k], np.float32) for k in "RGB")
+        mark = (r - b > 0.25) & (r > 0.25)          # the orange against the cool plate
+        if not mark.any():
+            print(f"{number}: no mark found", file=sys.stderr)
+            return 1
+        ys, xs = np.nonzero(mark)
+        cx, cy = float(xs.mean()), float(ys.mean())
+        tx, ty = disc_centre(number)
+        err = float(np.hypot(cx - tx, cy - ty))
+        worst = max(worst, err)
+        rows.append({"frame": number, "centroid": [cx, cy], "truth": [tx, ty], "error_px": err})
+        print(f"{number}: centroid ({cx:7.2f}, {cy:7.2f}) truth ({tx:7.2f}, {ty:7.2f}) error {err:5.2f} px"
+              + ("  (key: the mark as painted)" if number == KEY_FRAME else ""))
+    print(f"worst {worst:.2f} px over {len(rows)} frames")
+    return 0 if worst <= 0.5 else 1
 
 
 if __name__ == "__main__":
