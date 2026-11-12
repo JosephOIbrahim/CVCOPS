@@ -97,6 +97,12 @@ this one pauses for you to open the example scene.
 /goal Mission 4 is done: the transcript shows uv run python tools/check.py --houdini exiting 0 with the M4 rows listed and passing, the example scene carries a fix from a later frame onto earlier ones, Joe has looked at it, and docs/STATE.md has a log entry with the check command and the tail of its output. First confirm the committed tests/thresholds/mission.txt lists M4; if it does not, write WAITING: and stop. Constraints: Mission 4 only; hython only, never the Houdini GUI; no edits under tests/thresholds, tools/check.py, tools/lock_judge.py, docs/contracts or .claude; no new dependency. A pause is a stop: if the first line of docs/STATE.md starts with WAITING: or BLOCKED:, show that line and treat the goal as met. Otherwise stop after 50 turns and say what is left.
 ```
 
+**The release gate, v0.1**
+
+```text
+/goal v0.1 is released: the transcript shows uv run python tools/check.py --houdini exiting 0 with the M3 and M4 rows listed and passing, tools/install.py building the asset and writing one package file from a fresh clone, Joe's plate baked and audited as numbers only in docs/facts/rel_plate_summary.json, and docs/STATE.md holding every command with its tail, the plate summary and Joe's sign-off in his own words. First confirm git show HEAD:tests/thresholds/mission.txt lists M0 to M4 and that docs/STATE.md holds M4's close entry; if not, write WAITING: and stop. Constraints: the release only, as docs/missions/RELEASE_v0.1.md defines it; no new dependency; nothing installed into Houdini's Python; no .hda, plate pixel or machine path in a tracked file; one hython at a time, never the Houdini GUI; Claude never merges, tags or pushes the release. A pause is a stop: if the first line of docs/STATE.md starts with WAITING: or BLOCKED:, show that line and treat the goal as met. Otherwise stop after 60 turns and say what is left.
+```
+
 Then the release gate in `docs/BLUEPRINT.md`, which is yours.
 
 ## Unattended
