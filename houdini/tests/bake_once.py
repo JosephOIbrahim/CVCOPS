@@ -111,6 +111,64 @@ def flow(hou, d, preset, scale):
     return 0
 
 
+def pull(hou, d, preset):
+    """Frame B pulled onto A's grid by the asset's converted flow, through native Distort.
+
+    Writes <dir>/pulled.1001.exr: full size, grey in R, float32. The bake of 1001 supplies the flow; Distort takes B
+    and that flow at Scale -1 with Pixels per Step off (FACTS H38), so there is no second conversion.
+    """
+    n = names()
+    tname = f"{n['hda_namespace']}::{n['hda_flow']}::1.0"
+    if hou.nodeType(hou.copNodeTypeCategory(), tname) is None:
+        print(f"bake_once.py: {tname} is not installed; build it with houdini/build/build_hdas.py", file=sys.stderr)
+        return 3
+    if preset not in PRESETS:
+        print(f"bake_once.py: unknown preset {preset!r}; one of {sorted(PRESETS)}", file=sys.stderr)
+        return 1
+    if not os.path.isfile(os.path.join(d, "frame.1002.exr")):
+        print(f"bake_once.py: --mode pull needs {os.path.join(d, 'frame.1002.exr')}", file=sys.stderr)
+        return 1
+    hou.setFrame(1001)
+    net = hou.node("/obj").createNode("copnet", "bake_once_pull")
+    a_src = _raw_file(net, "frames_a", os.path.join(d, "frame.$F4.exr"), "vector")
+    b_src = _raw_file(net, "frames_b", os.path.join(d, "frame.$F4.exr"), "vector")
+    b_src.parm("filename").set(os.path.join(d, "frame.1002.exr").replace("\\", "/"))
+    node = net.createNode(tname, "flow1")
+    node.setInput(0, a_src, 0)
+    node.parm("recipe").set(PRESETS[preset])
+    node.parmTuple("frange").deleteAllKeyframes()
+    node.parmTuple("frange").set((1001, 1001))
+    node.parm("cache_dir").set(os.path.join(d, "cache").replace("\\", "/"))
+
+    sys.path.insert(0, str(ROOT / "houdini" / "python3.13libs"))
+    from cvcops_houdini import bake as bake_mod, pull as pull_mod, worker as worker_mod
+    try:
+        bake_mod.bake(node, n["env_prefix"])
+    except worker_mod.WorkerEnvironmentError as e:
+        print(f"bake_once.py: the worker cannot start: {e}", file=sys.stderr)
+        return 3
+    except bake_mod.BakeError as e:
+        print(f"bake_once.py: {e}", file=sys.stderr)
+        return 3 if e.code == 3 else 1
+
+    dist = pull_mod.pull_network(net, b_src, node, name="pull")
+    rop = net.createNode("rop_image", "write_pulled")
+    rop.setInput(0, dist, 0)
+    rop.parm("copoutput").set(os.path.join(d, "pulled.1001.exr").replace("\\", "/"))
+    rop.parm("trange").set("off")
+    rop.parm("colorconversion").set("raw")
+    rop.parm("savebackground").set(0)
+    rop.parm("exportattribs").set(0)
+    rop.parm("aov1").set("C")
+    rop.parm("size1").set("float32")
+    rop.parm("raw1").set(1)
+    rop.parm("execute").pressButton()
+    if rop.errors() or not os.path.isfile(os.path.join(d, "pulled.1001.exr")):
+        print("bake_once.py: writing pulled.1001.exr failed:" + chr(10).join(rop.errors()), file=sys.stderr)
+        return 1
+    return 0
+
+
 def _source_size(path):
     """(height, width) of a source frame, read with the OpenEXR bundled in Houdini's Python (FACTS P1)."""
     import OpenEXR
@@ -131,8 +189,7 @@ def main():
     ap.add_argument("--scale", type=float, default=1.0)
     args = ap.parse_args()
     if args.mode == "pull":
-        print("bake_once.py --mode pull: not built yet. It is Mission 4's work.", file=sys.stderr)
-        return 1
+        return pull(hou, os.path.abspath(args.dir), args.preset)
     return flow(hou, os.path.abspath(args.dir), args.preset, args.scale)
 
 
