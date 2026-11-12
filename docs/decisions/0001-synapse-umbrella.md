@@ -65,7 +65,7 @@ for compound edits) and from the roadmap's authority section.
 
 The repository moves under SYNAPSE only when all of these hold.
 
-- [ ] CVCOPs v0.1 has passed its release gate.
+- [x] CVCOPs v0.1 has passed its release gate, 12 November 2026 (the plate's numbers, the fresh clone and the two rungs are in `docs/STATE.md`). Its licence item stays open, as Joe decided at the release plan (OD-29).
 - [ ] SYNAPSE's tool interface has been read, and its adapter calls `flow` and `verify` through the manifest.
 - [ ] An adapter test in SYNAPSE passes against a pinned CVCOPs version.
 - [ ] The licence for CVCOPs is chosen and compatible with how SYNAPSE is released.

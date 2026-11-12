@@ -103,7 +103,7 @@ this one pauses for you to open the example scene.
 /goal v0.1 is released: the transcript shows uv run python tools/check.py --houdini exiting 0 with the M3 and M4 rows listed and passing, tools/install.py building the asset and writing one package file from a fresh clone, Joe's plate baked and audited as numbers only in docs/facts/rel_plate_summary.json, and docs/STATE.md holding every command with its tail, the plate summary and Joe's sign-off in his own words. First confirm git show HEAD:tests/thresholds/mission.txt lists M0 to M4 and that docs/STATE.md holds M4's close entry; if not, write WAITING: and stop. Constraints: the release only, as docs/missions/RELEASE_v0.1.md defines it; no new dependency; nothing installed into Houdini's Python; no .hda, plate pixel or machine path in a tracked file; one hython at a time, never the Houdini GUI; Claude never merges, tags or pushes the release. A pause is a stop: if the first line of docs/STATE.md starts with WAITING: or BLOCKED:, show that line and treat the goal as met. Otherwise stop after 60 turns and say what is left.
 ```
 
-Then the release gate in `docs/BLUEPRINT.md`, which is yours.
+The release gate's own line is above. It opened on 12 November 2026, and its evidence is in `docs/STATE.md`: the numbers table, the fresh clone, and the owner's sign-off on his plate. The merge, the tag and the pre-release are his, outside the session.
 
 ## Unattended
 

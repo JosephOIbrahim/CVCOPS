@@ -19,9 +19,9 @@ heading, and the Stop hook lets a turn end only when the checks pass or that lin
 
 | Item | State |
 | --- | --- |
-| Where we are | Mile 4 of 5 to v0.1. Mission 3 is closed and pushed. Mission 4 is closed in session 2 (12 Nov): the pull through native Distort passes (`pull_warp` 1.00228 levels), the example carries Joe's orange mark from key 1024 back to 1016 with a worst centroid error of 0.33 px, Joe judged the carry renders, and both M3 rows still pass. Flow Warp was never needed. Mission 5's brief is adopted, after M4 in the order, with its row change parked for its own start sitting. `main` matches `origin/main` at the close commit; the repository is public at `JosephOIbrahim/CVCOPS`. |
+| Where we are | Mile 5 of 5. v0.1's release gate has closed: engine 0.1.0, one-command install proved from a fresh clone, the numbers table green on all eleven rows, and the owner's plate baked, audited and signed off at gain 0.5 and gamma 2.2. Mission 5 (the live lane) is the one thing not built; its brief is adopted. What remains is Joe's, outside the session: merge `release/v0.1.0`, tag `v0.1.0`, push, and create the pre-release with `install.py` attached. |
 | Last evidence | 12 Nov, Mission 4 close: `uv run python tools/check.py --houdini` ends `CHECK: rung 2 passes (3 threshold rows; Houdini's Python unchanged since P1)`, exit 0, 82 s; `uv run python tools/check.py` ends `CHECK: rung 1 passes for M0, M1, M2, M3, M4 (8 threshold rows)`, exit 0. Row values: two regions 0.03742 and 0.11525 px; `pull_warp` 1.00228 levels (limit 1.5). Carry worst centroid 0.33 px over nine frames, and 0 mark pixels at 1025. |
-| Next action | The release gate is planned and accepted. Joe opens it (`REL.gate.start`), then the release runs from `docs/missions/RELEASE_v0.1.md`: prefs lookup and parked audit, version 0.1.0, install.py, the package check, limits, the fresh clone, then **the plate** -- which is still needed (pattern, frame range, colour space) before `REL.release.plate_bake` can run. Claude never merges, tags or pushes the release; that is Joe's last mile. |
+| Next action | Joe's last mile: merge `release/v0.1.0`, `git tag v0.1.0`, push `main` and the tag, then `gh release create v0.1.0 --prerelease --notes-file <notes> install.py`. The session does none of it. After that: Mission 5 when Joe adds the `live_cook` row and locks it, and the temporal check with rows first (`docs/OPPORTUNITIES.md`). |
 | Needs Joe first | The conftest.py judge fix, parked (11 Nov entry below): apply it from a Git Bash window on the workstation in `E:/Myth_and_Logic/Software/CVCOPS`, then `--selftest`, lock, commit. The `vendor/motion-cops` submodule step in `docs/SETUP.md`. The licence is settled (Joe, 10 Nov): no LICENSE file. |
 | Not yet a repository | Now a repository: `git init -b main` and the first commit `7542947` (`git add -A`, Joe-approved). `core.autocrlf` is true on this machine, so a fresh checkout or worktree gets CRLF in `.sh` files; watch for it in `tools/unattended.sh` worktrees. |
 | Open judgment call | GPU as the goal, or GPU as the means (`docs/BLUEPRINT.md`, section 3). Default: the means. |
@@ -230,3 +230,17 @@ Add one entry per mission: the date, the command that closed it, and the tail of
   planted faults, the 14 v0.1 controls, thirteen of the fifteen Limits rows, the 17 uses, and no claim anywhere that
   v0.1 is released, tagged or published. `docs/facts/rel_plate_summary.json` was untracked when the audit read it; it is
   committed now.
+- 2026-11-12, `REL.gate.signoff` and `REL.release.close`. Joe's sign-off, in his own words: "arrows follow the motion,
+  valid drops at occlusions and edges, still areas near zero and no flipped axis, warnings none." His plate: 99 pairs at
+  1920x1080, scene-linear, baked at gain 0.5 and gamma 2.2, 2.4% clipped, 61 grey levels, valid share 0.981 to 0.992,
+  largest p99 motion 34.7 px, 99 pairs fresh in the audit. Close checks, one hython call at a time: `uv run python
+  tools/check.py` -> `CHECK: rung 1 passes for M0, M1, M2, M3, M4 (8 threshold rows)`, exit 0; `uv run python tools/check.py
+  --houdini` -> `CHECK: rung 2 passes (3 threshold rows; Houdini's Python unchanged since P1)`, exit 0, 88 s;
+  `uv run python evidence/release_numbers.py` -> all eleven rows PASS in 4 s (FACTS R2); `uv run python probes/hython.py
+  probes/p1_environment.py --record probe_out/rel_p1_close.json` -> 22.0.492, Indie, Python 3.13.17, no OpenCV; the hython
+  binary is 4,370,360 bytes, sha256 df1256b2...a264ed, unchanged since M3; `evidence/refinement/gates.py docs/BLUEPRINT.md`
+  -> `GATES: PASS` (5,870 words, cap 5,878). Decision 0001's release-gate box is ticked with the date and its licence item
+  is left open as OD-29 settled. FACTS R3 carries the sign-off. The parked audit found nothing started early. Next actions
+  are Joe's: merge `release/v0.1.0`, tag `v0.1.0`, push both, and create the pre-release with `install.py` attached -- the
+  session merges, tags and pushes nothing. After that, Mission 5 when he adds the `live_cook` row, and the temporal check
+  with rows first.
