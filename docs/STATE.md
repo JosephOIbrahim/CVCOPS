@@ -187,3 +187,11 @@ Add one entry per mission: the date, the command that closed it, and the tail of
   0. The second plate bake still could not run from this session: with the guard gone the file is simply unreadable here
   (`Unable to read file 'D:/plates/shot_010/plate.1001.exr'`), which is the filesystem split recorded above, not a code
   problem. The command now works from the window where the plate is visible.
+- 2026-11-12, `REL.release.plate_bake`, second run, **Joe's run**, gain 0.5 and gamma 2.2: **99 pairs**, max clipped
+  share **0.024** (2.4%, under the 5% warning), min grey levels **61** (over 32), valid share min **0.981**, median
+  **0.992**. **No warning remains.** The first run at defaults clipped 41.2% and left 18 levels; the single gain and gamma
+  change brought both back inside the thresholds, which is what FACTS M15 predicted for a scene-linear plate. Both runs
+  are recorded, as the brief requires. The audit for the second run could not be run from this session: its cache is on the
+  filesystem the plate lives on (`probe_out/rel_plate_gain` here holds only this session's own empty attempt), so Joe runs
+  `uv run python evidence/audit_receipts.py probe_out/rel_plate_gain/cache --frames 1001-1099 --expect-sidecar` in the same
+  window and types the verdict.

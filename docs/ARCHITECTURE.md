@@ -60,6 +60,8 @@ rather than around it.
 | `src/cvcops/capabilities.json` | The manifest agents register tools from | The kit; missions flip `planned` to `available` | No, but its schema is |
 | `docs/contracts/` | The manifest and receipt schemas, an example receipt, the map onto SYNAPSE's observation | The kit | Yes |
 | `houdini/` | The asset's builder, its Python, `tests/bake_once.py` | Mission 3 | No |
+| `houdini/build/stamp.py`, `houdini/otls/` | The build stamp every install compares against; the per-user build, untracked, with its `.stamp.json` beside it | Mission 3, extended by the release | No |
+| `tools/install.py`, `tests/unit/test_install.py` | One-command install: the worker environment, `local.toml`, the self-test, the asset under your licence, one package file | The release | No |
 | `houdini/build/controls.json` | The asset's inputs, outputs and parameters; the builder's only source (`docs/CONTROLS.md`) | The kit; Mission 3 confirms it with Joe | No; `tests/unit/test_controls.py` guards it |
 | `docs/opportunities.json`, `src/cvcops/ops/temporal.py` | The register of uses after v0.1, and the stub for the first one (`docs/OPPORTUNITIES.md`, decision 0003) | The kit | No |
 | `GOALS.md` | One `/goal` line per Claude Code session | The kit | No |
@@ -101,6 +103,10 @@ Exit codes are the same everywhere: 0 pass, 1 a check failed, 3 a broken environ
 | `cvcops.receipt.v1` | `docs/contracts/receipt.schema.json` | A new field that may be null is compatible; anything else is v2 |
 | `cvcops.capabilities.v1` | `docs/contracts/capabilities.schema.json` | The same rule; SYNAPSE's adapter pins the version it reads |
 | Asset name | `[tool.cvcops.names]` in `pyproject.toml` | Never, once scenes use it (decision 0002) |
+| `cvcops.analysis_sidecar.v1` | `src/cvcops/io_exr.py`'s reader and `cvcops_houdini/sidecar.py`'s writer, shape in decision 0004 | Its allowed keys only grow: weights, gain, gamma, scale, colour space, fps |
+| `verify`'s JSON | `src/cvcops/cli.py` (`--json`), shape in decision 0004(g) | `frames`, `counts` and `pairs` keep their names |
+| `cvcops.bake.v1` | `docs/facts/m3_bake_receipt.json`; the per-bake record at `$cache/bake.json` keeps its own shape | A new phase key is compatible; `quarter` keeps its formula |
+| Distribution | Decision 0005: the builder and `tools/install.py`, no built `.hda`, the pre-release carries `install.py` pinned to the tag | Every release |
 
 ## Houdini without your setup
 

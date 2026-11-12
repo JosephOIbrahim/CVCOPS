@@ -36,5 +36,6 @@ namespace from there, the package installer reads the package name, and a guard 
 
 ## Still open
 
-- The licence for this code, and whether the repository is public or private. Decision 0001's fold-in checklist
-  needs both.
+- **Settled 12 November 2026 at the release plan** (OD-29): the repository is public, and v0.1 ships with no licence
+  file, so default copyright applies and the README says so. Decision 0001's licence item stays open; only its
+  release-gate box is ticked.
