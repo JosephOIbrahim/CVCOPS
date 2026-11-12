@@ -1,3 +1,4 @@
+WAITING: Start M5 sitting is blocked on a terminal that writes to this disk. The live_cook row, its metric, Reference.live and RUNG["M5"] are applied in evidence/thresholds_reference.py and tests/thresholds/impls.py, --selftest passes with live_cook at 0.0000, and mission.txt ends at M5; the lock has not landed (judge.lock is still 8e77167b with the old file hashes), so nothing is committed. Resume with the lock in a terminal that writes here, then one 'Start M5' commit.
 # State
 
 Updated 2026-11-12. This is the capsule: the next session resumes from here.
@@ -260,3 +261,16 @@ Add one entry per mission: the date, the command that closed it, and the tail of
   row for it (tag `v0.1.0`, pre-release, `install.py` attached), and the install paragraph links
   `releases/download/v0.1.0/install.py` and `releases/tag/v0.1.0`, noting that the downloaded installer clones that tag
   rather than main. The option list gained `--packages` and `--force`, which the audit had flagged as missing.
+- 2026-11-12, Start M5 sitting stopped, documented, nothing reverted. What is on this disk and proven: the `live_cook`
+  row at `evidence/thresholds_reference.py:52`, `LEVELS_PER_UNIT` and the metric at `:192` and `:195` (`a, b =
+  next(iter(_suite(cache).values()))[:2]` after the first attempt indexed the dict as a list), its `METRICS` entry at
+  `:277`, `Reference.live` at `:61`, and in `tests/thresholds/impls.py` `RUNG["M5"] = 2` at `:29`, `ProductImpl.live` at
+  `:91` and `HoudiniImpl.live` at `:220`. `uv run python tools/check.py --selftest` ends `CHECK: the reference passes every
+  row and every planted fault is caught`, exit 0, with `live_cook` at 0.0000; `mission.txt` ends at `M5`. What is missing:
+  the lock. `judge.lock` is still `8e77167b` and still records the pre-edit hashes `e7596d98` and `05b01497`, while the files
+  on disk are `9622c226` and `9b7203f5`; three attempts reported a new lock (the last said `4f1c2a8e`) and none reached this
+  disk, the same read-here-write-elsewhere split that swallowed the plate copies. So no `Start M5` commit: it would publish
+  a lock that does not match the files. Joe chose to leave the edits in place rather than revert them. Resume: run
+  `uv run python tools/lock_judge.py` in a terminal that writes to this repository, then one commit carrying
+  `judge.lock`, `tests/thresholds/mission.txt`, `tests/thresholds/impls.py` and `evidence/thresholds_reference.py`, and lift
+  this line.
