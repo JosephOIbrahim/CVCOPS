@@ -319,3 +319,11 @@ Add one entry per mission: the date, the command that closed it, and the tail of
   script writes the row, the corrected metric, `LEVELS_PER_UNIT`, `Reference.live` and `RUNG["M5"]`, and `--selftest` ends
   `CHECK: the reference passes every row and every planted fault is caught`, exit 0, `live_cook` at 0.0000.
 - 2026-11-12, Start M5 stops at pass 1 of the five-pass refinement. The lock terminal ran `echo probe > probe_out/write_check.txt`; read from this session at 16:10:33, that file still showed **13:55:19** and still held **`test`**, not `probe`. So the terminal's write did not reach this disk, and the lock, commit and push must not be attempted from it. The five-pass sheet (in the local tool folder) says what each pass requires: a visible write, a green self-test, a changed lock with a fresh timestamp, a green judge check, and a commit whose contents match the proof. Pass 1 failed, so passes 2 to 5 do not run. The repository stays green: `judge.lock` still `8e77167b`, rung 1 passes, tree clean, and no M5 edits are present. Start M5 resumes with a terminal attached to this workstation's own desktop, or another process that demonstrably writes to this `E:` drive; no amount of retrying the current terminal is refinement. The code side is already proven by the earlier self-test with `live_cook` at `0.0000`.
+- 2026-11-12, Start M5 sitting reverted a fourth time, at Joe's instruction. The three sitting files went back to the
+  lock and the pause line came off `STATE.md`. The fourth attempt followed the proven write path as far as it could go: the
+  row, its corrected metric, `Reference.live` and `RUNG["M5"]` were applied and verified here, and the self-test passed with
+  `live_cook` at 0.0000. Then the lock still didn't land: `judge.lock` remained `8e77167b` at 07:12:37, still naming the
+  pre-edit hashes, and the M5 line in `mission.txt` never arrived either. No commit was made, because a lock that does not
+  match the files would leave `check.py` red for every session on this machine. The lesson, recorded once and for all: the
+  `!` channel writes here, but the terminal used for the lock does not. Until that terminal writes a test file visible from
+  this session, Start M5 stays reverted. The repository is green, the judge matches its lock, and v0.1.0 is unaffected.
