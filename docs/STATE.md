@@ -284,3 +284,15 @@ Add one entry per mission: the date, the command that closed it, and the tail of
   every planted fault is caught`, exit 0, `live_cook` at 0.0000. To redo: run `m5_row_edit.py` in the local tool folder, which
   now carries that correction, then `--selftest`, M5 into `mission.txt`, one lock in a terminal that writes here, and one
   commit.
+- 2026-11-12, Start M5 sitting reverted a second time, at Joe's instruction. `git checkout` restored
+  `evidence/thresholds_reference.py`, `tests/thresholds/impls.py` and `tests/thresholds/mission.txt` to the lock, and the
+  pause line came off `STATE.md`. Both attempts failed the same way and for the same reason: the code side is settled --
+  the parked script writes the row, the metric (with `next(iter(_suite(cache).values()))[:2]`), `LEVELS_PER_UNIT`,
+  `Reference.live` and `RUNG["M5"]`, and `--selftest` ends `CHECK: the reference passes every row and every planted fault is
+  caught`, exit 0, `live_cook` at 0.0000 -- but the lock never reached this disk. `judge.lock` stayed `8e77167b` with a
+  07:12:37 timestamp while three separate runs reported new hashes, and the `printf` for `mission.txt` never appeared either.
+  That is a shell that reads this repository and writes somewhere else, which is the same split that swallowed the plate
+  copies, the Start M4 attempts and the first two release commands. Until a terminal demonstrably writes here (`echo test >
+  probe_out/write_check.txt` appearing on this side), Start M5 cannot finish, because the commit needs a lock that matches
+  the files. Nothing else is affected: both judge files are back to their locked bytes, rung 1 passes, and the repository is
+  green for every session on this machine.
