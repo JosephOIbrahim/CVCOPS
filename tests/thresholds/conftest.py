@@ -25,8 +25,11 @@ def pytest_runtest_logreport(report):
     if report.when != "call" and report.passed:
         return
     outcome = report.outcome
-    if report.failed and "EnvironmentProblem" in str(report.longrepr):
-        outcome = "environment"
+    if report.failed:
+        crash = getattr(report.longrepr, "reprcrash", None)
+        first = crash.message if crash is not None else str(report.longrepr or "")
+        if first.split(":", 1)[0].rsplit(".", 1)[-1] == "EnvironmentProblem":
+            outcome = "environment"
     entry = {"outcome": outcome, "when": report.when}
     entry.update({k: v for k, v in report.user_properties})
     if report.failed:
