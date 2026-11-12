@@ -296,3 +296,14 @@ Add one entry per mission: the date, the command that closed it, and the tail of
   probe_out/write_check.txt` appearing on this side), Start M5 cannot finish, because the commit needs a lock that matches
   the files. Nothing else is affected: both judge files are back to their locked bytes, rung 1 passes, and the repository is
   green for every session on this machine.
+- 2026-11-12, Start M5 sitting reverted a third time, at Joe's instruction, and the attempts stop here until a lock can
+  be proved to write to this disk. `git checkout` restored `evidence/thresholds_reference.py`, `tests/thresholds/impls.py`
+  and `tests/thresholds/mission.txt`, and the pause line came off `STATE.md`. The third attempt reproduced the first two
+  exactly: the row, the corrected metric (`next(iter(_suite(cache).values()))[:2]`), `LEVELS_PER_UNIT`, `Reference.live` and
+  `RUNG["M5"]` all applied and `--selftest` green with `live_cook` at 0.0000, `mission.txt` at M5 -- and then the lock,
+  reported as `4f1c2a8e`, left this disk untouched: `judge.lock` stayed `8e77167b` at its 07:12:37 timestamp, still naming
+  `e7596d98` and `05b01497`. The same hash was reported earlier in the day, which suggests a stale file on another disk
+  rather than a fresh lock. What was never run: the write test in the lock terminal itself (`echo again >
+  probe_out/write_check.txt`), which is the one line that would say whether that terminal writes here at all -- it did pass
+  from this prompt at 13:55:19. Until that is shown, M5 cannot start: the commit needs a lock matching the files. Nothing else
+  is affected; the repository is green, rung 1 passes, and every session on this machine sees a judge that matches its lock.
