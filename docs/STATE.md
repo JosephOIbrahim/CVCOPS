@@ -307,3 +307,14 @@ Add one entry per mission: the date, the command that closed it, and the tail of
   probe_out/write_check.txt`), which is the one line that would say whether that terminal writes here at all -- it did pass
   from this prompt at 13:55:19. Until that is shown, M5 cannot start: the commit needs a lock matching the files. Nothing else
   is affected; the repository is green, rung 1 passes, and every session on this machine sees a judge that matches its lock.
+- 2026-11-12, the lock terminal's write test, and what it settles. Run in that terminal, `echo probe > probe_out/write_check.txt`
+  printed a timestamp near 15:20; read from this session seconds later, `probe_out/write_check.txt` still showed **13:55:19**
+  and still held `test`, not `probe`. So that terminal *reads* this repository -- it printed `9622c226` for
+  `evidence/thresholds_reference.py` -- and *writes to a different filesystem*. That is the whole explanation for the three
+  lock attempts that reported `4f1c2a8e` while `judge.lock` here stayed `8e77167b` at 07:12:37: the tool ran, wrote its lock,
+  and the lock landed on the other disk. No further attempts are worth making in that terminal. Start M5 needs a shell running
+  on this machine's own desktop -- its own keyboard and screen, or a process started here rather than in a remote or mounted
+  session -- and the tell is that the write test's timestamp moves on this side. Until then the repository stays green:
+  `judge.lock` matches its files, rung 1 passes, and nothing is half-done. The M5 code side is settled and proven: the parked
+  script writes the row, the corrected metric, `LEVELS_PER_UNIT`, `Reference.live` and `RUNG["M5"]`, and `--selftest` ends
+  `CHECK: the reference passes every row and every planted fault is caught`, exit 0, `live_cook` at 0.0000.
