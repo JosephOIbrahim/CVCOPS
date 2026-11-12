@@ -1,4 +1,3 @@
-WAITING: Start M5 sitting is blocked on a terminal that writes to this disk. The live_cook row, its metric, Reference.live and RUNG["M5"] are applied in evidence/thresholds_reference.py and tests/thresholds/impls.py, --selftest passes with live_cook at 0.0000, and mission.txt ends at M5; the lock has not landed (judge.lock is still 8e77167b with the old file hashes), so nothing is committed. Resume with the lock in a terminal that writes here, then one 'Start M5' commit.
 # State
 
 Updated 2026-11-12. This is the capsule: the next session resumes from here.
@@ -274,3 +273,14 @@ Add one entry per mission: the date, the command that closed it, and the tail of
   `uv run python tools/lock_judge.py` in a terminal that writes to this repository, then one commit carrying
   `judge.lock`, `tests/thresholds/mission.txt`, `tests/thresholds/impls.py` and `evidence/thresholds_reference.py`, and lift
   this line.
+- 2026-11-12, Start M5 sitting reverted, at Joe's instruction. `git checkout` put `evidence/thresholds_reference.py`,
+  `tests/thresholds/impls.py` and `tests/thresholds/mission.txt` back to the lock, and the pause line came off `STATE.md`.
+  The reason the sitting stopped: three lock runs reported a new `judge.lock` (the last said `4f1c2a8e`) and none reached this
+  disk -- the file stayed `8e77167b` with the pre-edit hashes inside, while the working tree held the edited files -- so no
+  `Start M5` commit could be made without publishing a lock that does not match. Joe chose the revert over leaving the two
+  judge files unlocked. What was proved before the revert and is worth keeping: the row, its metric, `LEVELS_PER_UNIT`,
+  `Reference.live` and `RUNG["M5"]` are correct as the parked script writes them, once its metric reads
+  `next(iter(_suite(cache).values()))[:2]`; with that correction `--selftest` ends `CHECK: the reference passes every row and
+  every planted fault is caught`, exit 0, `live_cook` at 0.0000. To redo: run `m5_row_edit.py` in the local tool folder, which
+  now carries that correction, then `--selftest`, M5 into `mission.txt`, one lock in a terminal that writes here, and one
+  commit.
