@@ -167,3 +167,23 @@ Add one entry per mission: the date, the command that closed it, and the tail of
   `uv run python tools/check.py` -> `CHECK: rung 1 passes for M0, M1, M2, M3, M4`, exit 0; `uv run python tools/check.py
   --houdini` -> `CHECK: rung 2 passes (3 threshold rows; Houdini's Python unchanged since P1)`, exit 0, 83 s. Next: the
   plate, which still needs its shot name, then the review, audit, sign-off, numbers, docs sweep and close.
+- 2026-11-12, `REL.release.plate_bake`, first run, **Joe's run**. The plate (`D:/plates/shot_010/plate.####.exr`, frames
+  1001-1100, 1920x1080, scene-linear) is on a filesystem this session cannot read: four copies (D before and after the
+  mount, E:/plates, and inside `probe_out/`) were all invisible here, while commands typed into the session do land. So
+  Joe ran `uv run python probes/hython.py houdini/tests/bake_timing.py --run 1 --out probe_out/rel_plate --source
+  D:/plates/shot_010/plate.$F4.exr --frames 1001-1099 --colorspace raw` and `evidence/audit_receipts.py
+  probe_out/rel_plate/cache --frames 1001-1099 --expect-sidecar` in his own window, and typed the numbers. Result: **99
+  pairs**; max clipped share **0.412**; min grey levels **18**; valid share min **0.981**, median **0.992**; largest p99
+  motion **34.7 px**. **Warning, and it is the expected one:** at default gain 1.0 and gamma 1.0 a scene-linear plate
+  clips 41.2% of its pixels and leaves 18 grey levels, both past the receipt's thresholds (5% clipped, 32 levels), exactly
+  as FACTS M15 measured for scene-linear frames straight to 8 bits. Only Gain and Gamma may change, and both runs are
+  recorded; Joe chooses the values. FACTS R1 carries these numbers marked as a typed report rather than this session's
+  measurement.
+- 2026-11-12, `REL.release.plate_bake` caught a real release defect: `houdini/tests/bake_timing.py` refused an absolute
+  `--source`, so the release could not bake a plate kept outside the repository, which is exactly what decision 0005
+  requires. Fixed: an absolute `--source` is now accepted and the run record keeps only the pattern's last component
+  (`plate.$F4.exr`), so every committed path stays free of absolute paths while still naming what was baked; a relative
+  source behaves as before. `uv run python -m pytest tests/unit -q` -> 211 passed; `tools/check.py` -> rung 1 passes, exit
+  0. The second plate bake still could not run from this session: with the guard gone the file is simply unreadable here
+  (`Unable to read file 'D:/plates/shot_010/plate.1001.exr'`), which is the filesystem split recorded above, not a code
+  problem. The command now works from the window where the plate is visible.

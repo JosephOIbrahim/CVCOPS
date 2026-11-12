@@ -97,8 +97,10 @@ def main():
     ap.add_argument("--analysis-scale", default="1.0")
     args = ap.parse_args()
 
-    if os.path.isabs(args.source):
-        return fail("--source must be relative to the repository, so the receipt holds no absolute path")
+    # A plate lives outside the repository, so an absolute --source is allowed; the receipt records only the pattern's
+    # last component, which keeps every committed path-free and still names what was baked.
+    source_path = args.source if os.path.isabs(args.source) else (ROOT / args.source).as_posix()
+    recorded_source = (os.path.basename(args.source) if os.path.isabs(args.source) else args.source)
     first, last = parse_frames(args.frames)
     out = (ROOT / args.out).resolve() if not os.path.isabs(args.out) else Path(args.out)
     if out.exists() and any(out.iterdir()):
@@ -125,7 +127,7 @@ def main():
 
     hou.setFps(24.0)
     hou.setFrame(first)
-    pattern = (ROOT / args.source).as_posix()
+    pattern = source_path
     try:
         nodes = build_scene.example_network(hou, hou.node("/obj"), pattern, colorspace=args.colorspace, name="timing")
     except LookupError as e:
@@ -182,7 +184,7 @@ def main():
         return fail(f"a pair ran on another backend than {args.backend}")
 
     run = {"schema": RUN_SCHEMA, "run": args.run,
-           "workload": {"source": args.source, "size": [first_r["image"]["width"], first_r["image"]["height"]],
+           "workload": {"source": recorded_source, "size": [first_r["image"]["width"], first_r["image"]["height"]],
                         "frames": [first, last], "pairs": last - first + 1, "analysis_scale": args.analysis_scale,
                         "recipe": args.recipe, "backend": args.backend, "threads": first_r["threads"],
                         "cv2_version": first_r["cv2"]["version"], "cv2_build_sha256": first_r["cv2"]["build_sha256"],
