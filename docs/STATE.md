@@ -244,3 +244,9 @@ Add one entry per mission: the date, the command that closed it, and the tail of
   are Joe's: merge `release/v0.1.0`, tag `v0.1.0`, push both, and create the pre-release with `install.py` attached -- the
   session merges, tags and pushes nothing. After that, Mission 5 when he adds the `live_cook` row, and the temporal check
   with rows first.
+- 2026-11-12, release close pushed. `main` moved from `0d61814` to **`3c2ad56` "Close the v0.1 release gate"** and matches
+  `origin/main`: engine 0.1.0, the installer, the limits, the package check, the fresh clone, the plate's two runs and
+  audit, the numbers table, the README audit's fixes, Joe's sign-off and the close are all published. **The gate is closed
+  and nothing is left in the repository.** What remains is Joe's, outside the session: merge `release/v0.1.0`, tag
+  `v0.1.0`, push the tag, and create the pre-release with `install.py` attached. When that is done its URL goes in the
+  next entry.
