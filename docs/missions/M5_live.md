@@ -1,6 +1,6 @@
 # Mission M5: the live lane
 
-A proposal, written 2026-11-11 at Joe's request, not adopted. The blueprint's M5 row governs; this brief adds the order,
+A proposal, written 2026-11-11 at Joe's request and adopted by him the same day, unchanged. The blueprint's M5 row governs; this brief adds the order,
 the files and the checks. Graph and conventions: `docs/missions/GRAPH.md`.
 
 **Goal.** Make the flow cook inside Copernicus, frame by frame, so an artist can scrub the result instead of waiting for
