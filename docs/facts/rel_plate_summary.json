@@ -1,0 +1,20 @@
+{
+  "schema": "cvcops.plate_summary.v1",
+  "about": "The owner's plate, as numbers only (OD-25). No pixels, no path beyond this sentence's owner's word, nothing quotable beyond these fields.",
+  "source": "Joe's own runs on his machine, 2026-11-12; the session could not read the plate's filesystem, so every number here is his typed report, as FACTS R1 records.",
+  "plate": {"frames": [1001, 1099], "pairs": 99, "size": [1920, 1080], "colour_space": "scene-linear"},
+  "runs": [
+    {"run": 1, "gain": 1.0, "gamma": 1.0,
+     "max_clipped_share": 0.412, "min_grey_levels": 18,
+     "valid_share_min": 0.981, "valid_share_median": 0.992,
+     "largest_p99_motion_px": 34.7,
+     "warnings": ["over 5% of pixels clipped", "under 32 grey levels"]},
+    {"run": 2, "gain": 0.5, "gamma": 2.2,
+     "max_clipped_share": 0.024, "min_grey_levels": 61,
+     "valid_share_min": 0.981, "valid_share_median": 0.992,
+     "largest_p99_motion_px": 34.7,
+     "warnings": []}
+  ],
+  "audit": {"pairs_fresh": 99, "sidecar": "non-null", "analysis_scale": 1.0, "gain": 0.5, "gamma": 2.2, "fps": 24.0},
+  "chosen": {"run": 2, "gain": 0.5, "gamma": 2.2, "why": "the single gain and gamma change took clipping from 41.2% to 2.4% and grey levels from 18 to 61, both inside the receipt thresholds"}
+}

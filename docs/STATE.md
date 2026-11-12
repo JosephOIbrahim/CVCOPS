@@ -208,3 +208,11 @@ Add one entry per mission: the date, the command that closed it, and the tail of
   release can close. The review scene itself reads the baked cache without editing the asset, renders arrows, the pull
   and their difference at three frames, prints the receipts' gain, gamma, warnings and the largest p99 motion, and saves
   `plate_review.hip` -- all of which ran, since he opened the file.
+- 2026-11-12, `REL.release.numbers`. `evidence/release_numbers.py` builds the table from the sources rather than from
+  prose: the locked rows and their limits come from `tests/thresholds/impls.py`, the rung-1 values from running the
+  reference over them, the rung-2 values from Joe's last values run (`probe_out/m4_rows.json`), the timings and the quarter
+  ratio from `docs/facts/m3_bake_receipt.json`, and the plate from `docs/facts/rel_plate_summary.json`, which was written
+  from Joe's typed numbers and says so. `uv run python evidence/release_numbers.py` -> 4 s, exit 0: eight rung-1 rows PASS,
+  three rung-2 rows PASS (0.037421 / 0.11525 / 1.0023 levels), medians total 21.146 s and flow_compute 5.783 s with the
+  quarter at 0.2735, and the plate at gain 0.5 gamma 2.2 with 2.4% clipped, 61 grey levels and no warnings. FACTS R2;
+  `evidence/README.md` lists the script beside `package_install_check.py`. Nothing is written by either run.
