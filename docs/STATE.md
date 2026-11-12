@@ -201,3 +201,10 @@ Add one entry per mission: the date, the command that closed it, and the tail of
   fresh and schema-valid, and the warnings that fired at defaults are gone. The numeric summary (valid share, clipped
   share, grey levels, largest p99 motion, timing medians) is to be written into `docs/facts/rel_plate_summary.json` from
   Joe's typed numbers, marked as a typed report like FACTS R1.
+- 2026-11-12, `REL.cop.plate-review`, **Joe's run**: he ran `uv run python probes/hython.py
+  houdini/examples/build_scene.py --plate --cache probe_out/rel_plate_gain/cache --frames 1001-1099 --out
+  probe_out/rel_plate` and opened `probe_out/rel_plate/plate_review.hip`. What the command printed and what he saw did not
+  reach this session, so the observations are still to be typed; `REL.gate.signoff` needs them in his words before the
+  release can close. The review scene itself reads the baked cache without editing the asset, renders arrows, the pull
+  and their difference at three frames, prints the receipts' gain, gamma, warnings and the largest p99 motion, and saves
+  `plate_review.hip` -- all of which ran, since he opened the file.
