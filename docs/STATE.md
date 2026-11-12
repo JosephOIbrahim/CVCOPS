@@ -19,9 +19,9 @@ heading, and the Stop hook lets a turn end only when the checks pass or that lin
 
 | Item | State |
 | --- | --- |
-| Where we are | Mile 5 of 5. v0.1's release gate has closed: engine 0.1.0, one-command install proved from a fresh clone, the numbers table green on all eleven rows, and the owner's plate baked, audited and signed off at gain 0.5 and gamma 2.2. Mission 5 (the live lane) is the one thing not built; its brief is adopted. What remains is Joe's, outside the session: merge `release/v0.1.0`, tag `v0.1.0`, push, and create the pre-release with `install.py` attached. |
+| Where we are | v0.1.0 is published as a pre-release: https://github.com/JosephOIbrahim/CVCOPS/releases/tag/v0.1.0, tag `v0.1.0` on `e247704`, with `install.py` attached (12,829 bytes, sha256 cdce1643...). The gate closed at `3c2ad56`; engine 0.1.0, the installer, the limits, the package check, the fresh clone, the plate's two runs and audit, the numbers table and Joe's sign-off are all published. Mission 5 (the live lane) is the one mission not built. |
 | Last evidence | 12 Nov, Mission 4 close: `uv run python tools/check.py --houdini` ends `CHECK: rung 2 passes (3 threshold rows; Houdini's Python unchanged since P1)`, exit 0, 82 s; `uv run python tools/check.py` ends `CHECK: rung 1 passes for M0, M1, M2, M3, M4 (8 threshold rows)`, exit 0. Row values: two regions 0.03742 and 0.11525 px; `pull_warp` 1.00228 levels (limit 1.5). Carry worst centroid 0.33 px over nine frames, and 0 mark pixels at 1025. |
-| Next action | Joe's last mile: merge `release/v0.1.0`, `git tag v0.1.0`, push `main` and the tag, then `gh release create v0.1.0 --prerelease --notes-file <notes> install.py`. The session does none of it. After that: Mission 5 when Joe adds the `live_cook` row and locks it, and the temporal check with rows first (`docs/OPPORTUNITIES.md`). |
+| Next action | Mission 5, when Joe adds the `live_cook` row and locks it: the row-change script is parked in the local tool folder, and the brief is `docs/missions/M5_live.md`. After that, the temporal check with rows first (`docs/OPPORTUNITIES.md`), and the two parked items: the `conftest.py` judge fix and the SETUP.md submodule step. |
 | Needs Joe first | The conftest.py judge fix, parked (11 Nov entry below): apply it from a Git Bash window on the workstation in `E:/Myth_and_Logic/Software/CVCOPS`, then `--selftest`, lock, commit. The `vendor/motion-cops` submodule step in `docs/SETUP.md`. The licence is settled (Joe, 10 Nov): no LICENSE file. |
 | Not yet a repository | Now a repository: `git init -b main` and the first commit `7542947` (`git add -A`, Joe-approved). `core.autocrlf` is true on this machine, so a fresh checkout or worktree gets CRLF in `.sh` files; watch for it in `tools/unattended.sh` worktrees. |
 | Open judgment call | GPU as the goal, or GPU as the means (`docs/BLUEPRINT.md`, section 3). Default: the means. |
@@ -250,3 +250,9 @@ Add one entry per mission: the date, the command that closed it, and the tail of
   and nothing is left in the repository.** What remains is Joe's, outside the session: merge `release/v0.1.0`, tag
   `v0.1.0`, push the tag, and create the pre-release with `install.py` attached. When that is done its URL goes in the
   next entry.
+- 2026-11-12, v0.1.0 published. `gh release create` from this session created the pre-release and its tag together:
+  **https://github.com/JosephOIbrahim/CVCOPS/releases/tag/v0.1.0**, tag `v0.1.0` pointing at **`e247704`**, marked
+  pre-release, with **`install.py`** attached (12,829 bytes, sha256 `cdce1643...`). Verified from the session with `gh
+  release view v0.1.0` and `git ls-remote --tags origin`. Two attempts before it failed for the same reason the plate
+  copies did -- the commands ran somewhere that was not this repository -- and the third, run here with the corrected
+  asset path `tools/install.py`, landed. The release gate closed at `3c2ad56`; this entry records where the release lives.
