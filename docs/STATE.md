@@ -148,3 +148,22 @@ Add one entry per mission: the date, the command that closed it, and the tail of
   C:/Users/User/OneDrive/Documents/houdini22.0/packages`, exit 0; `uv run python -m pytest tests/unit -q` -> 218 passed;
   `uv run python tools/check.py` -> `CHECK: rung 1 passes for M0, M1, M2, M3, M4 (8 threshold rows)`, exit 0. Next in the
   brief: the package check in hython, the Limits section, the fresh clone, then the plate (which needs its shot name).
+- 2026-11-12, release nodes three to five. `REL.contract.package_install`: the script the brief expected from M3 did not
+  exist, so it was written here -- `evidence/package_install_check.py` writes `package.py`'s own file into an empty folder,
+  starts hython with the judge's isolated environment but `HOUDINI_PACKAGE_DIR` at that folder, and reports whether the
+  type resolves, whether the worker variable matches the file, and whether `cv2` leaked. `uv run python
+  evidence/package_install_check.py` -> `resolves: True`, `matches the package: True`, `cv2 in process: False`, `CHECK: the
+  package file alone loads the asset and names the worker`, exit 0, 3 s. One correction on the way: the inner half must
+  compare the worker against the written file, not against a fresh `package_dict()`, because `sys.executable` inside
+  hython is hython. `REL.release.limits`: `README.md` gains a Limits section whose fourteen lines each name the measured
+  limit, why, and the FACTS entry behind it -- CPU only, forward flow only, validity as a flag, patch size 16, 32-bit
+  flow, 8-bit analysis needing Gain and Gamma, equal frame sizes, the Frame Range default, Distort as the pull with
+  Pixels per Step off, Indie assets being limited commercial, the Switch clamp at 1016 in the example, the tested
+  platform, thresholds from synthetic frames plus one plate, and no licence file. `REL.release.fresh_clone`: a local clone
+  at `E:/Myth_and_Logic/Software/CVCOPS-fresh` (outside the repository, kept as evidence) was installed with one command
+  -- `uv run python tools/install.py --packages <clone>/probe_out/packages` -> exit 0, 45 s: `uv sync`, local.toml,
+  self-test, asset built under this machine's licence with stamp `bd39e9f9` (equal to the LF tree's, which is the CRLF
+  promise), and one package file in the clone's own folder rather than Joe's real preferences. In the clone:
+  `uv run python tools/check.py` -> `CHECK: rung 1 passes for M0, M1, M2, M3, M4`, exit 0; `uv run python tools/check.py
+  --houdini` -> `CHECK: rung 2 passes (3 threshold rows; Houdini's Python unchanged since P1)`, exit 0, 83 s. Next: the
+  plate, which still needs its shot name, then the review, audit, sign-off, numbers, docs sweep and close.

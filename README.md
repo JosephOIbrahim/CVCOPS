@@ -146,6 +146,29 @@ Seventeen uses sit on the same two layers. **The temporal check comes first**: p
 
 None of that is built. Each item waits for v0.1, and each ML lane waits for a probe.
 
+## Limits, and where each one is recorded
+
+Every line here is a measured limit, not a caveat. The evidence is in [`docs/FACTS.md`](docs/FACTS.md).
+
+| Limit | Why | Evidence |
+| --- | --- | --- |
+| **CPU only in v0.1.** `opencl` and `cuda` are refused before any work | no v0.1 recipe is graded on a GPU; the refusal writes nothing | FACTS M2, decision 0004(d); `docs/STATE.md`'s DEC.quarter line |
+| **Forward flow only.** A fix travels to earlier frames, never later ones | the cache holds flow from A to B; there is no backward pair | M4's carry example, FACTS H40 |
+| **Validity is a flag, not a mask.** It misses narrow occlusions | forward-backward agreement fails on thin occluders | FACTS M12 to M14 |
+| **DIS patch size at most 16 px** before OpenCV 5.1 | the OpenCV release notes; larger patches misbehave | `CLAUDE.md`, gotchas |
+| **Flow loads at 32-bit.** Half float rounds large motions | a half-float layer moves a 512 to 1024 px motion by up to 0.25 px | FACTS M17 |
+| **8-bit analysis needs Gain and Gamma** on scene-linear plates | scene-linear frames clip when quantised to 8 bits | FACTS M15; the receipt warns above 5% clipped or under 32 grey levels |
+| **Frame sizes must match** between the two frames of a pair | the worker pairs equal-sized images | `src/cvcops/ops/flow.py` |
+| **The Frame Range default stops one frame early** | the export needs a successor frame for the last pair | OD-28; `docs/CONTROLS.md` |
+| **Distort is the pull.** Pixels per Step off matches `cv2.remap`; on drifts | measured on twelve pairs and a 149 px field | FACTS H38 |
+| **An asset built under Indie is limited commercial**, so `install.py` builds it under your own licence | SideFX's licence terms; no `.hda` ships | FACTS P7; decision 0005 |
+| **A carried fix left of 1016 in the example shows the 1016 mark** | the Switch clamps at the first carried step | M4's close entry |
+| **Windows 11 and Houdini 22.0.492** are what is tested | every number here came from that pair | FACTS P1, and every row's own line |
+| **Thresholds come from synthetic frames plus one owner plate** | the locked rows are synthetic; the plate is evidence, not a row | `tests/thresholds/`, `docs/facts/rel_plate_summary.json` |
+| **No licence file.** Default copyright applies | Joe's decision at the release plan | OD-29; decision 0005 |
+
+Where this table and the running build disagree, the build wins and `docs/FACTS.md` is corrected.
+
 ## Install
 
 **One command sets up everything that exists today.** You need `git` and [`uv`](https://docs.astral.sh/uv/). `uv` fetches Python 3.13 and the pinned packages for you.
