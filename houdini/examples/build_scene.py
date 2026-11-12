@@ -172,6 +172,66 @@ def render_carry(hou, nodes, out, key=1024, steps=8):
     return 0
 
 
+def render_plate(hou, nodes, out, cache, frames):
+    """The owner's plate review: arrows, B pulled onto A, and their difference (REL.cop.plate-review).
+
+    Reads the baked cache without touching the asset. Saves the scene into probe_out/rel_plate for Joe to open, prints the
+    receipts' encoding warnings with the gain and gamma that ran, and the largest p99 motion against the step cap M4
+    found. Nothing in src/ or the asset changes.
+    """
+    import json as _json
+    import sys as _sys
+    _sys.path.insert(0, str(ROOT / "houdini" / "python3.13libs"))
+    from cvcops_houdini import pull as pull_mod
+
+    first, last = (int(v) for v in frames.split("-", 1))
+    net = nodes["net"]
+    plate = nodes["frames"]
+    flow = nodes["flow"]
+    b_src = raw_file(net, "plate_b", "$HIP/frames/plate.$F4.exr", "raw")
+    ts = net.createNode("timeshift", "plate_b_next")
+    ts.setInput(0, b_src, 0)
+    try:
+        ts.parm("mode").set("custom")
+    except Exception:
+        pass
+    ts.parm("frame").setExpression("$F + 1")
+    pulled = pull_mod.pull_network(net, ts, flow, name="plate_pull")
+    diff = net.createNode("blend", "plate_diff")
+    diff.setInput(0, plate, 0)
+    diff.setInput(1, pulled, 0)
+    diff.parm("mode").set("subtract")
+    net.layoutChildren()
+
+    for frame in (first, (first + last) // 2, last - 1):
+        for key, node in (("arrows", nodes["arrows"]), ("pull", pulled), ("diff", diff)):
+            render(hou, net, node, f"$HIP/renders/{key}.{frame}.exr", frame)
+    try:
+        hou.hipFile.setName(os.path.join(out, "plate_review.hip").replace("\\", "/"))
+        hou.hipFile.save(save_to_recent_files=False)
+        print(f"saved {os.path.join(out, 'plate_review.hip')}")
+    except Exception as e:  # a read-only review is not a failure
+        print(f"build_scene.py: the scene was not saved: {e}", file=sys.stderr)
+
+    # the receipts' own warnings, and the motion against M4's step cap
+    warn, gain, gamma, worst = [], None, None, 0.0
+    for frame in range(first, last + 1):
+        path = os.path.join(cache, f"flow.{frame:04d}.json")
+        if not os.path.isfile(path):
+            continue
+        with open(path, encoding="utf-8") as f:
+            r = _json.load(f)
+        a = r.get("analysis", {})
+        gain, gamma = a.get("gain"), a.get("gamma")
+        warn.extend(a.get("warnings") or [])
+        worst = max(worst, float(r.get("summary", {}).get("p99_motion_px", 0.0)))
+    print(f"plate review: frames {first}-{last}, gain {gain}, gamma {gamma}")
+    print("warnings: " + (", ".join(sorted(set(warn))) if warn else "none"))
+    print(f"largest p99 motion {worst:.1f} px; M4 measured Distort uncapped to 149 px (FACTS H38)")
+    print("what to judge: arrows follow the motion, valid drops at occlusions and edges, still areas near zero, no flipped axis")
+    return 0
+
+
 def main():
     try:
         import hou
@@ -184,6 +244,9 @@ def main():
     ap.add_argument("--save", action="store_true", help="save the scene into --out (Joe's go-ahead, OD-16)")
     ap.add_argument("--carry", action="store_true",
                     help="carry the OD-21 mark back from the key frame and render 1016-1024")
+    ap.add_argument("--plate", action="store_true", help="review scene for the owner's plate (REL.cop.plate-review)")
+    ap.add_argument("--cache", help="the plate's baked cache folder")
+    ap.add_argument("--frames", help="the plate's frame range, first-last")
     args = ap.parse_args()
     out = os.path.abspath(args.out)
     frames_dir = os.path.join(out, "frames")
@@ -220,6 +283,9 @@ def main():
         return 3 if e.code == 3 else 1
     print("bake: " + ", ".join(f"{k} {v:.2f} s" for k, v in times.items()))
 
+    if args.plate:
+        code = render_plate(hou, nodes, out, args.cache or os.path.join(out, "cvcops", "flow1"), args.frames or "1001-1099")
+        return code
     if args.carry:
         code = render_carry(hou, nodes, out)
         if code:

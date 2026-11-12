@@ -195,3 +195,9 @@ Add one entry per mission: the date, the command that closed it, and the tail of
   filesystem the plate lives on (`probe_out/rel_plate_gain` here holds only this session's own empty attempt), so Joe runs
   `uv run python evidence/audit_receipts.py probe_out/rel_plate_gain/cache --frames 1001-1099 --expect-sidecar` in the same
   window and types the verdict.
+- 2026-11-12, `REL.contract.plate_audit`, first half, **Joe's run**: the second plate bake's receipts pass
+  `evidence/audit_receipts.py --frames 1001-1099 --expect-sidecar` -- **99 pairs fresh**, sidecar non-null, scale **1.0**,
+  gain **0.5**, gamma **2.2**, fps **24**. So the plate's analysis settings are the ones the run recorded, every receipt is
+  fresh and schema-valid, and the warnings that fired at defaults are gone. The numeric summary (valid share, clipped
+  share, grey levels, largest p99 motion, timing medians) is to be written into `docs/facts/rel_plate_summary.json` from
+  Joe's typed numbers, marked as a typed report like FACTS R1.
