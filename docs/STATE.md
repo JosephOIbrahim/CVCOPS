@@ -129,3 +129,22 @@ Add one entry per mission: the date, the command that closed it, and the tail of
   commercial; the plate proves the product and never enters git. The parked audit reports nothing started early
   (M5's row change and its brief are documents only; no body of a parked stub was written).
 - 2026-11-12, `REL.release.plan` OKed. Joe's answers, all as proposed: **OD-23** the GitHub pre-release carries `install.py` only and that copy clones the `v0.1.0` tag, with a `release/v0.1.0` candidate branch; **OD-24** the package file goes to `HOUDINI_USER_PREF_DIR` with `__HVER__` expanded, else the Windows Documents `houdini22.0/packages`, never Git Bash's `HOME`, and the asset rebuilds when the stamp differs, never by modification time; **OD-26** a fresh clone is proved in the session scratch folder and no `.gitattributes` is added; **OD-29** v0.1 ships with no licence file, the README says so, and decision 0001's licence item stays open with only its release-gate box ticked. **OD-25** accepted with **numbers only** quotable from the plate; the plate's pattern, frame range and colour space were not supplied in this answer, so `REL.gate.plate` and `REL.release.plate_bake` stay closed until Joe gives them. Decision 0005 is accepted on that basis. README, logo and GitHub metadata drafts sit in the local tool folder's `rel-drafts/`, outside the repository, for the release's README nodes and for Joe to paste; the session does not set a repository description or topics, and does not tag. Committed as 'Plan the v0.1 release'.
+- 2026-11-12, release gate open; first release nodes done. `REL.gate.start`: Joe opened the gate and named the plate --
+  `D:/plates/<shot>/plate.####.exr`, frames 1001-1100, scene-linear (not raw), numbers only quotable. `REL.release.prefs_lookup`:
+  desktop Houdini 22 on this machine reads `C:/Users/User/OneDrive/Documents/houdini22.0/packages`, the folder `cvcops.json`
+  already lives in; hython and Git Bash's `HOME` point elsewhere, which is the mismatch OD-24 exists for; `tools/install.py
+  --check` now resolves that same path by itself (Documents known folder), never `HOME`. `REL.release.parked_audit`: nothing
+  parked was started -- `src/cvcops/ops/temporal.py` still raises `NotImplementedError` for both functions, no ML lane code
+  was added, no operation, no dependency; what exists beyond v0.1 is the M5 brief and documents. `REL.release.version`: the
+  engine reads 0.1.0 in `pyproject.toml`, `src/cvcops/__init__.py` and `capabilities.json`; `tests/unit/test_version.py`
+  asserts the three agree and that the cache key does not move when the version does (same request, different version,
+  same key). `uv.lock` changed only the cvcops entry. `REL.release.install`: `tools/install.py` now builds the asset when
+  it is missing or its stamp differs from the tree (never by modification time), with `--force`; then writes exactly one
+  package file into `HOUDINI_USER_PREF_DIR` with `__HVER__` expanded, else the Documents folder, else `--packages`; prints
+  the path for Joe to confirm; `--check` writes nothing; `--no-houdini` skips both; a builder exit 3 stops with 3; and a
+  downloaded copy clones `RELEASE_TAG = v0.1.0` instead of main. Six new tests cover the folder default without HOME, the
+  `--packages` override, `--check` writing nothing, the stamp rule, and the tag clone. Evidence: `uv run python tools/install.py
+  --check` -> `KEEP the asset is built and matches this tree (stamp bd39e9f9)`, `WOULD write the package file into
+  C:/Users/User/OneDrive/Documents/houdini22.0/packages`, exit 0; `uv run python -m pytest tests/unit -q` -> 218 passed;
+  `uv run python tools/check.py` -> `CHECK: rung 1 passes for M0, M1, M2, M3, M4 (8 threshold rows)`, exit 0. Next in the
+  brief: the package check in hython, the Limits section, the fresh clone, then the plate (which needs its shot name).

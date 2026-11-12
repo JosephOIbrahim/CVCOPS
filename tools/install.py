@@ -9,7 +9,8 @@ What it does, in order:
 1. Builds the worker's environment from the pinned lock file (`uv sync`).
 2. Finds Houdini's hython and writes `local.toml`, unless that file already exists.
 3. Runs the judge's self-test, so you know the tests work on this machine.
-4. Registers the node with Houdini, once the node exists. Today it does not, so this step is skipped and says so.
+4. Builds the asset under your own licence when it is missing or its build stamp differs from the tree, then writes
+   one Houdini package file where desktop Houdini reads it, and prints the path for you to confirm.
 
 What it never does: install anything into Houdini's Python, change a system setting, need administrator rights,
 or overwrite a `local.toml` you already have. Run it again at any time; it only fills in what is missing.
@@ -18,9 +19,11 @@ or overwrite a `local.toml` you already have. Run it again at any time; it only 
     --hython PATH    use this hython instead of searching for one
     --no-houdini     skip the Houdini steps
     --no-selftest    skip the self-test (about 40 seconds)
+    --packages DIR   write the package file into DIR instead of the default folder
+    --force          rebuild the asset even when its stamp matches
 
-Run from outside a checkout (for example a copy downloaded from a release), it clones the repository into
-./CVCOPS first and carries on there.
+Run from outside a checkout (for example a copy downloaded from a release), it clones the tag in `RELEASE_TAG` into
+./CVCOPS first and carries on there, so a downloaded installer keeps installing the version it came from.
 
 Exit code: 0 done, 1 the self-test failed, 3 a tool this needs is missing.
 """
@@ -34,6 +37,8 @@ import tomllib
 from pathlib import Path
 
 REPO = "https://github.com/JosephOIbrahim/CVCOPS.git"
+RELEASE_TAG = "v0.1.0"          # a downloaded copy clones this tag, never main (OD-23)
+HOUDINI_PREF = "houdini22.0"    # desktop Houdini 22's folder name inside Documents (OD-24)
 ROOT = Path(__file__).resolve().parents[1]
 
 
@@ -93,12 +98,81 @@ def run(cmd, root, quiet=False):
     return subprocess.run(cmd, cwd=root, capture_output=quiet, text=True)
 
 
+def expand_hver(path, hython=None):
+    """Houdini's `__HVER__` is `major.minor`; take it from the hython found, else 22.0."""
+    if "__HVER__" not in str(path):
+        return Path(path)
+    major_minor = ".".join(str(v) for v in version_key(hython)[:2]) if hython else "22.0"
+    return Path(str(path).replace("__HVER__", major_minor))
+
+
+def documents_folder():
+    """The Windows Documents known folder, which is where desktop Houdini looks. Never the shell's HOME (OD-24)."""
+    if sys.platform == "win32":
+        try:
+            import ctypes
+            buf = ctypes.create_unicode_buffer(260)
+            if ctypes.windll.shell32.SHGetFolderPathW(None, 5, None, 0, buf) == 0 and buf.value:
+                return Path(buf.value)
+        except (AttributeError, OSError):
+            pass
+    return Path.home() / "Documents"
+
+
+def packages_folder(env=None, hython=None):
+    """Where the package file goes: HOUDINI_USER_PREF_DIR if set, else Documents/houdini22.0/packages."""
+    env = os.environ if env is None else env
+    upd = env.get("HOUDINI_USER_PREF_DIR")
+    if upd:
+        return expand_hver(upd, hython) / "packages"
+    return documents_folder() / HOUDINI_PREF / "packages"
+
+
+def asset_file(root, names=None):
+    """The asset's file name, from [tool.cvcops.names]."""
+    if names is None:
+        names = tomllib.loads((root / "pyproject.toml").read_text(encoding="utf-8"))["tool"]["cvcops"]["names"]
+    return f"{names['hda_namespace']}_{names['hda_flow']}.hda"
+
+
+def tree_stamp(root):
+    """houdini/build/stamp.py's stamp over the tree, imported by path so install needs no package."""
+    import importlib.util
+    path = root / "houdini" / "build" / "stamp.py"
+    spec = importlib.util.spec_from_file_location("cvcops_stamp", path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module.stamp(root)
+
+
+def _local_hython(root):
+    try:
+        return tomllib.loads((root / "local.toml").read_text(encoding="utf-8")).get("hython")
+    except (OSError, tomllib.TOMLDecodeError):
+        return None
+
+
+def build_state(root):
+    """(asset present, stamp matches, the stamp file's value, the tree's value)."""
+    otls = root / "houdini" / "otls"
+    name = asset_file(root)
+    stamp_file = otls / f"{name}.stamp.json"
+    built = (otls / name).is_file()
+    recorded = None
+    if stamp_file.is_file():
+        import json
+        recorded = json.loads(stamp_file.read_text(encoding="utf-8")).get("stamp")
+    return built, recorded == tree_stamp(root), recorded, tree_stamp(root)
+
+
 def main(argv=None, root=ROOT):
     ap = argparse.ArgumentParser(prog="install.py", description="Install CVCOPs from a git checkout.")
     ap.add_argument("--check", action="store_true", help="report what it would do and change nothing")
     ap.add_argument("--hython", help="use this hython instead of searching for one")
     ap.add_argument("--no-houdini", action="store_true", help="skip the Houdini steps")
     ap.add_argument("--no-selftest", action="store_true", help="skip the self-test")
+    ap.add_argument("--packages", metavar="DIR", help="write the package file into DIR")
+    ap.add_argument("--force", action="store_true", help="rebuild the asset even when its stamp matches")
     a = ap.parse_args(argv)
 
     if not in_checkout(root):                      # a lone copy, for example from a release page
@@ -107,11 +181,14 @@ def main(argv=None, root=ROOT):
             return 3
         target = Path.cwd() / "CVCOPS"
         if a.check:
-            say("WOULD", f"clone {REPO} into {target}")
+            say("WOULD", f"clone {REPO} at {RELEASE_TAG or 'main'} into {target}")
             return 0
         if not in_checkout(target):
             say("RUN", f"git clone {REPO}")
-            if run(["git", "clone", REPO, str(target)], Path.cwd()).returncode:
+            clone = ["git", "clone", "--depth", "1"]
+            if RELEASE_TAG:
+                clone += ["--branch", RELEASE_TAG]
+            if run(clone + [REPO, str(target)], Path.cwd()).returncode:
                 return 3
         return subprocess.run(["uv", "run", "python", "tools/install.py", *(argv if argv is not None else sys.argv[1:])], cwd=target).returncode
 
@@ -162,16 +239,45 @@ def main(argv=None, root=ROOT):
             return 1
         say("OK", last.replace("CHECK: ", ""))
 
-    # 4. the node
-    built = any((root / "houdini" / "otls").glob("*.hda")) if (root / "houdini" / "otls").is_dir() else False
+    # 4. the asset, built here under this machine's licence
+    if a.no_houdini:
+        say("SKIP", "the asset build and the package file, as asked")
+    else:
+        built, matches, recorded, current = build_state(root)
+        if built and matches and not a.force:
+            say("KEEP", f"the asset is built and matches this tree (stamp {str(current)[:12]})")
+        elif a.check:
+            say("WOULD", "build the asset: uv run python probes/hython.py houdini/build/build_hdas.py --out houdini/otls")
+        else:
+            why = "forced" if a.force else ("no asset" if not built else "the tree changed since the build")
+            say("RUN", f"the asset build ({why})")
+            r = run(["uv", "run", "python", "probes/hython.py", "houdini/build/build_hdas.py", "--out", "houdini/otls"],
+                    root)
+            if r.returncode == 3:
+                say("STOP", "the asset build needs a Houdini licence; run this on a machine with one")
+                return 3
+            if r.returncode:
+                say("FAIL", "the asset build failed")
+                return 1
+            built, matches, recorded, current = build_state(root)
+            if not built:
+                say("FAIL", "the build reported success but wrote no asset")
+                return 1
+            say("OK", f"the asset is built under this machine's licence (stamp {str(current)[:12]})")
+
+    # 5. one package file, where desktop Houdini looks
     if a.no_houdini:
         pass
-    elif not built:
-        say("SKIP", "the Houdini node is not built yet (Mission 3), so nothing is added to Houdini")
-    elif a.check:
-        say("WOULD", "write one Houdini package file with: uv run python -m cvcops package --write")
     else:
-        say("NEXT", 'run: uv run python -m cvcops package --write "$HOUDINI_USER_PREF_DIR/packages"')
+        target = Path(a.packages) if a.packages else packages_folder(hython=_local_hython(root))
+        if a.check:
+            say("WOULD", f"write the package file into {target}")
+        else:
+            r = run(["uv", "run", "python", "-m", "cvcops", "package", "--write", str(target)], root, quiet=True)
+            if r.returncode:
+                say("FAIL", f"writing the package file into {target} failed")
+                return 1
+            say("OK", f"package file written: {target}  <- check this is the folder your desktop Houdini reads")
 
     print("Done." if not a.check else "Checked. Nothing was changed.")
     print("Where things stand: docs/STATE.md. Plain tools/check.py fails until the owner's judge.lock exists; that is by design.")

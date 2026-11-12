@@ -56,3 +56,66 @@ def test_check_changes_nothing(tmp_path):
 
 def test_outside_a_checkout_it_knows(tmp_path):
     assert install.in_checkout(ROOT) and not install.in_checkout(tmp_path)
+
+
+# ---- REL.release.install: the release's promises ----------------------------------------------------------------
+def _install():
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("cvcops_install", ROOT / "tools" / "install.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def test_the_package_folder_uses_the_houdini_variable_first():
+    m = _install()
+    got = m.packages_folder(env={"HOUDINI_USER_PREF_DIR": "C:/prefs/houdini__HVER__"}, hython=None)
+    assert got.as_posix() == "C:/prefs/houdini22.0/packages"
+
+
+def test_the_package_folder_never_falls_back_to_home(monkeypatch):
+    m = _install()
+    monkeypatch.setattr(m, "documents_folder", lambda: m.Path("D:/Users/someone/Documents"))
+    got = m.packages_folder(env={}, hython=None)
+    assert got.as_posix() == "D:/Users/someone/Documents/houdini22.0/packages"
+    assert "HOME" not in got.as_posix()
+
+
+def test_packages_argument_wins(tmp_path):
+    m = _install()
+    rc = m.main(["--check", "--packages", str(tmp_path), "--no-selftest", "--no-houdini"])
+    assert rc == 0
+    assert not any(tmp_path.iterdir())
+
+
+def test_check_writes_nothing(tmp_path, monkeypatch):
+    m = _install()
+    before = sorted(p.name for p in ROOT.iterdir())
+    rc = m.main(["--check", "--packages", str(tmp_path), "--no-selftest"])
+    assert rc == 0
+    assert sorted(p.name for p in ROOT.iterdir()) == before
+
+
+def test_the_asset_is_rebuilt_only_when_the_stamp_differs():
+    m = _install()
+    built, matches, recorded, current = m.build_state(ROOT)
+    assert built is True
+    assert recorded == current, "the committed asset should match the tree it was built from"
+    assert matches is True
+
+
+def test_a_downloaded_installer_clones_the_release_tag(monkeypatch, tmp_path):
+    m = _install()
+    calls = []
+
+    class Result:
+        returncode = 0
+
+    monkeypatch.setattr(m, "in_checkout", lambda root=None: False)
+    monkeypatch.setattr(m, "shutil", type("S", (), {"which": staticmethod(lambda name: "git")}))
+    monkeypatch.setattr(m, "run", lambda cmd, cwd, quiet=False: calls.append(cmd) or Result())
+    monkeypatch.setattr(m.subprocess, "run", lambda *a, **k: Result())
+    monkeypatch.chdir(tmp_path)
+    m.main([])
+    assert calls and calls[0][:5] == ["git", "clone", "--depth", "1", "--branch"]
+    assert m.RELEASE_TAG in calls[0]
