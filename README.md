@@ -26,8 +26,8 @@ For every pixel in a frame, it answers two questions. The first is where that pi
 
 ## Where it stands
 
-**v0.1 is being finished, not released.** The judge, the worker and the Houdini asset are built and proven, and the
-release gate is open. One mission is left before it: the live lane.
+**v0.1.0 is out as a [pre-release](https://github.com/JosephOIbrahim/CVCOPS/releases/tag/v0.1.0).** The judge, the worker
+and the Houdini asset are built, proven and published; one mission sits outside it, the live lane.
 
 | Part | State on 12 November 2026 |
 | --- | --- |
@@ -36,6 +36,7 @@ release gate is open. One mission is left before it: the live lane.
 | M1 to M4: the flow operation, the worker command, the Houdini asset and the pull | Done and closed. `two_region` reads 0.037 px at analysis scale 1.0 and 0.115 px at 0.5; the pull reads 1.0023 levels against a 1.5 limit |
 | The example: a two-region plate, a carry, a look | Done. A painted mark carried eight frames back from a key frame tracks the plate to 0.33 px |
 | M5, the live lane | Not built. The brief is adopted and starts after M4 |
+| v0.1.0, published 12 November 2026 | Tag `v0.1.0`, pre-release, `install.py` attached. Install with that one file; it builds the asset under your own licence |
 | The installer, `tools/install.py` | Built. It sets up the worker, writes `local.toml`, runs the self-test, builds the asset under your own licence, and writes one package file |
 | A licence | None. There is no `LICENSE` file, the same as MotionCOPs, so default copyright applies |
 
@@ -199,9 +200,9 @@ The installer is safe to run again. It only fills in what is missing.
 | Build the asset under your licence when it is missing or its stamp differs | Commit or ship a built `.hda` |
 | Write one package file, and print its path for you to confirm | Install anything into Houdini's Python |
 
-To see what it would do without changing anything, add `--check`. Other options are `--hython PATH`, `--no-houdini` and `--no-selftest`.
+To see what it would do without changing anything, add `--check`. Other options are `--packages DIR`, `--force`, `--hython PATH`, `--no-houdini` and `--no-selftest`.
 
-You can also download `install.py` alone from the [latest pre-release](https://github.com/JosephOIbrahim/CVCOPS/releases) and run `uv run install.py`. It clones the repository first.
+You can also download [`install.py`](https://github.com/JosephOIbrahim/CVCOPS/releases/download/v0.1.0/install.py) from [the v0.1.0 pre-release](https://github.com/JosephOIbrahim/CVCOPS/releases/tag/v0.1.0) and run `uv run install.py`. It clones the `v0.1.0` tag first, so a downloaded installer keeps installing the version it came from.
 
 The package file is what makes the node appear: after installing, `cvcops::flow::1.0` is in Copernicus's Tab menu. Remove it by deleting that one file.
 

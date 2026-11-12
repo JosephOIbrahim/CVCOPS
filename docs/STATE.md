@@ -256,3 +256,7 @@ Add one entry per mission: the date, the command that closed it, and the tail of
   release view v0.1.0` and `git ls-remote --tags origin`. Two attempts before it failed for the same reason the plate
   copies did -- the commands ran somewhere that was not this repository -- and the third, run here with the corrected
   asset path `tools/install.py`, landed. The release gate closed at `3c2ad56`; this entry records where the release lives.
+- 2026-11-12, the README points at the release. Its status block now says v0.1.0 is out as a pre-release, the table gains a
+  row for it (tag `v0.1.0`, pre-release, `install.py` attached), and the install paragraph links
+  `releases/download/v0.1.0/install.py` and `releases/tag/v0.1.0`, noting that the downloaded installer clones that tag
+  rather than main. The option list gained `--packages` and `--force`, which the audit had flagged as missing.
